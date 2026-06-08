@@ -35,12 +35,19 @@ import SemanticVersion
 public struct WhiskyWineVersion: Codable {
     public var version: SemanticVersion
 
+    /// The bundled DXVK (macOS) version recorded alongside the runtime version,
+    /// e.g. `"1.10.3"`. Optional so runtime plists written before this key
+    /// existed still decode.
+    public var dxvkVersion: String?
+
     enum CodingKeys: String, CodingKey {
         case version
+        case dxvkVersion
     }
 
-    public init(version: SemanticVersion) {
+    public init(version: SemanticVersion, dxvkVersion: String? = nil) {
         self.version = version
+        self.dxvkVersion = Self.normalized(dxvkVersion)
     }
 
     public init(from decoder: Decoder) throws {
@@ -50,6 +57,14 @@ public struct WhiskyWineVersion: Codable {
         let minor = try versionDict.decode(Int.self, forKey: .minor)
         let patch = try versionDict.decode(Int.self, forKey: .patch)
         version = SemanticVersion(major, minor, patch)
+        dxvkVersion = try Self.normalized(container.decodeIfPresent(String.self, forKey: .dxvkVersion))
+    }
+
+    /// Collapses an empty DXVK version string to `nil` so "absent" and "blank"
+    /// map to the same state (and never render as a dangling `DXVK:` line).
+    private static func normalized(_ value: String?) -> String? {
+        guard let value, !value.isEmpty else { return nil }
+        return value
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -58,6 +73,7 @@ public struct WhiskyWineVersion: Codable {
         try versionDict.encode(version.major, forKey: .major)
         try versionDict.encode(version.minor, forKey: .minor)
         try versionDict.encode(version.patch, forKey: .patch)
+        try container.encodeIfPresent(dxvkVersion, forKey: .dxvkVersion)
     }
 
     private enum VersionKeys: String, CodingKey {

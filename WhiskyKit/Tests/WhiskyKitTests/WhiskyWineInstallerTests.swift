@@ -16,6 +16,7 @@
 //  If not, see https://www.gnu.org/licenses/.
 //
 
+import SemanticVersion
 @testable import WhiskyKit
 import XCTest
 
@@ -67,5 +68,58 @@ final class WhiskyWineInstallerTests: XCTestCase {
         WhiskyWineInstaller.cleanupTarball(at: tarURL)
 
         XCTAssertTrue(FileManager.default.fileExists(atPath: tarURL.path))
+    }
+
+    func testWhiskyWineInfoAtReadsVersionAndDXVK() throws {
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let plistURL = tempDir.appendingPathComponent("WhiskyWineVersion").appendingPathExtension("plist")
+        let plist: [String: Any] = [
+            "version": ["major": 3, "minor": 0, "patch": 0],
+            "dxvkVersion": "1.10.3"
+        ]
+        let data = try PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0)
+        try data.write(to: plistURL)
+
+        let info = WhiskyWineInstaller.whiskyWineInfo(at: plistURL)
+
+        XCTAssertEqual(info?.version, SemanticVersion(3, 0, 0))
+        XCTAssertEqual(info?.dxvkVersion, "1.10.3")
+    }
+
+    func testWhiskyWineInfoAtMissingFileReturnsNil() {
+        let missing = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathComponent("WhiskyWineVersion.plist")
+
+        XCTAssertNil(WhiskyWineInstaller.whiskyWineInfo(at: missing))
+    }
+
+    func testWhiskyWineInfoAtMalformedFileReturnsNil() throws {
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        // A present-but-corrupt plist must be swallowed to nil, not crash.
+        let garbageURL = tempDir.appendingPathComponent("WhiskyWineVersion").appendingPathExtension("plist")
+        try Data("this is not a plist".utf8).write(to: garbageURL)
+
+        XCTAssertNil(WhiskyWineInstaller.whiskyWineInfo(at: garbageURL))
+    }
+
+    func testWhiskyWineInfoAtPartialPlistReturnsNil() throws {
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        // Valid plist but missing a required version field — decode throws, swallowed to nil.
+        let partialURL = tempDir.appendingPathComponent("WhiskyWineVersion").appendingPathExtension("plist")
+        let plist: [String: Any] = ["version": ["major": 3, "minor": 0]]
+        let data = try PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0)
+        try data.write(to: partialURL)
+
+        XCTAssertNil(WhiskyWineInstaller.whiskyWineInfo(at: partialURL))
     }
 }

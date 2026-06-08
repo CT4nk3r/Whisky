@@ -125,6 +125,7 @@ public struct WhiskyWineSetupDiagnostics: Codable, Sendable {
         lines.reserveCapacity(estimatedCapacity)
 
         appendHeaderLines(into: &lines, stage: stage, error: error)
+        appendVersionLines(into: &lines)
         appendNetworkLines(into: &lines)
         appendProgressLines(into: &lines)
         appendInstallAttemptLines(into: &lines)
@@ -140,6 +141,26 @@ public struct WhiskyWineSetupDiagnostics: Codable, Sendable {
         lines.append("Generated: \(Date().formatted(Self.eventTimestampFormatter))")
         appendIfPresent("Error", value: error, into: &lines)
         lines.append("")
+    }
+
+    private func appendVersionLines(into lines: inout [String]) {
+        lines.append(contentsOf: Self.versionSectionLines(for: WhiskyWineInstaller.whiskyWineInfo()))
+    }
+
+    /// Builds the `[VERSION]` section for a runtime record. Pure and `internal`
+    /// so the rendering can be unit-tested with injected values; the production
+    /// path reads the installed record via `WhiskyWineInstaller.whiskyWineInfo()`.
+    /// The header is always emitted; the runtime/DXVK lines only when recorded.
+    static func versionSectionLines(for info: WhiskyWineVersion?) -> [String] {
+        var lines = ["[VERSION]"]
+        if let version = info?.version.description {
+            lines.append("WhiskyWine: \(version)")
+        }
+        if let dxvk = info?.dxvkVersion {
+            lines.append("DXVK: \(dxvk)")
+        }
+        lines.append("")
+        return lines
     }
 
     private func appendNetworkLines(into lines: inout [String]) {

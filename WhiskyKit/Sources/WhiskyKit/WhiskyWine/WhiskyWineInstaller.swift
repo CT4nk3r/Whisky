@@ -238,17 +238,46 @@ public class WhiskyWineInstaller {
     ///   or `nil` if WhiskyWine is not installed or the version
     ///   file cannot be read.
     public static func whiskyWineVersion() -> SemanticVersion? {
-        do {
-            let versionPlist = libraryFolder
-                .appending(path: "WhiskyWineVersion")
-                .appendingPathExtension("plist")
+        whiskyWineInfo()?.version
+    }
 
+    /// The bundled DXVK (macOS) version recorded in the installed runtime's
+    /// version plist, or `nil` if WhiskyWine is not installed or the plist does
+    /// not record a DXVK version.
+    public static func whiskyWineDXVKVersion() -> String? {
+        whiskyWineInfo()?.dxvkVersion
+    }
+
+    /// Reads the full version record from the installed WhiskyWine runtime.
+    ///
+    /// - Returns: The decoded ``WhiskyWineVersion``, or `nil` if WhiskyWine is
+    ///   not installed or the version file cannot be read.
+    public static func whiskyWineInfo() -> WhiskyWineVersion? {
+        let versionPlist = libraryFolder
+            .appending(path: "WhiskyWineVersion")
+            .appendingPathExtension("plist")
+        return whiskyWineInfo(at: versionPlist)
+    }
+
+    /// Reads a WhiskyWine version record from a plist at an arbitrary URL.
+    ///
+    /// ``whiskyWineInfo()`` resolves the installed location; this overload reads
+    /// any plist URL (also convenient for tests).
+    ///
+    /// - Parameter url: The location of a `WhiskyWineVersion.plist` file.
+    /// - Returns: The decoded record, or `nil` if it is missing or malformed.
+    public static func whiskyWineInfo(at url: URL) -> WhiskyWineVersion? {
+        do {
             let decoder = PropertyListDecoder()
-            let data = try Data(contentsOf: versionPlist)
-            let info = try decoder.decode(WhiskyWineVersion.self, from: data)
-            return info.version
+            let data = try Data(contentsOf: url)
+            return try decoder.decode(WhiskyWineVersion.self, from: data)
+        } catch let error as CocoaError where error.code == .fileReadNoSuchFile {
+            // Expected when WhiskyWine simply isn't installed yet.
+            logger.debug("WhiskyWine version plist absent: \(error.localizedDescription)")
+            return nil
         } catch {
-            logger.debug("WhiskyWine version not found: \(error.localizedDescription)")
+            // Present but unreadable/undecodable — likely a corrupt install.
+            logger.error("WhiskyWine version plist unreadable, likely corrupt: \(error.localizedDescription)")
             return nil
         }
     }
