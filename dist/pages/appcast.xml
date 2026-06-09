@@ -6,6 +6,28 @@
         <description>Whisky update feed</description>
         <language>en</language>
         <item>
+            <title>Whisky 3.1.0</title>
+            <pubDate>Tue, 09 Jun 2026 01:26:40 +0000</pubDate>
+            <sparkle:version>46</sparkle:version>
+            <sparkle:shortVersionString>3.1.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <p>One-click migration from the original Whisky, ~50 more supported games, and reliability fixes.</p>
+                <ul>
+                    <li><strong>File → Migrate from the Original Whisky</strong> imports your existing bottles in place, non-destructively.</li>
+                    <li>Fixes a bug where an idle Wine process could peg a CPU core.</li>
+                    <li>~50 new bundled GameDB entries with one-click recommended configs (now 79 titles).</li>
+                    <li>Wine inherits the host timezone; display sleep is suppressed during play; host fonts are copied so Unity titles render text.</li>
+                </ul>
+                <p>See the <a href="https://github.com/frankea/Whisky/releases/tag/app-v3.1.0">release notes</a> for the full changelog.</p>
+            ]]></description>
+            <enclosure
+                url="https://github.com/frankea/Whisky/releases/download/app-v3.1.0/Whisky-3.1.0.dmg"
+                sparkle:edSignature="mQ7sWt+LFJjhRrKUO7w9Jnaz9YkxjvX5GraRBy4I2pK3y1Z8nmcVeSMza5jsvLGo7mpBszlbRcQ1DfcTYNDpDw=="
+                length="8564044"
+                type="application/octet-stream" />
+        </item>
+        <item>
             <title>Whisky 3.0.1</title>
             <pubDate>Thu, 01 May 2026 02:55:00 +0000</pubDate>
             <sparkle:version>45</sparkle:version>
