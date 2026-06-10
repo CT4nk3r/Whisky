@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- The Wine runtime download is now verified against a published SHA-256 before
+  installation. A corrupted or truncated download is caught and rejected with a
+  clear error and a retry, instead of unpacking a broken runtime. Runtime
+  metadata that predates the published checksum still installs unchanged.
+
 ### Documentation
 - Landing page (`frankea.github.io/Whisky`) now shows app screenshots, adds an
   honest "Graphics backends" section (D3DMetal default, why DXVK is pinned at
