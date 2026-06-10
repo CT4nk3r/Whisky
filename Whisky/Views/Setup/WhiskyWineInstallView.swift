@@ -143,10 +143,10 @@ struct WhiskyWineInstallView: View {
 
             let capturedTarURL = tarLocation
             diagnostics.record("Invoking WhiskyWineInstaller.install(from:) in detached task")
-            let isInstalled = await Task.detached {
-                WhiskyWineInstaller.install(from: capturedTarURL)
-                return WhiskyWineInstaller.isWhiskyWineInstalled()
-            }.value
+            let (installFailureMessage, isInstalled) = await Self.performInstall(tarball: capturedTarURL)
+            if let installFailureMessage {
+                diagnostics.record("Install failed: \(installFailureMessage)")
+            }
             let installStatus = isInstalled ? "installed" : "not installed"
             diagnostics.record(
                 "Detached WhiskyWineInstaller.install(from:) task completed: \(installStatus)"
@@ -164,6 +164,11 @@ struct WhiskyWineInstallView: View {
             installing = false
             if isInstalled {
                 installError = nil
+            } else if let installFailureMessage {
+                installError = String(
+                    format: String(localized: "setup.whiskywine.error.installFailed.detail"),
+                    Self.shortened(installFailureMessage)
+                )
             } else {
                 installError = String(localized: "setup.whiskywine.error.installFailed")
             }
@@ -174,5 +179,28 @@ struct WhiskyWineInstallView: View {
             try? await Task.sleep(for: Self.installSuccessDelay)
             proceed()
         }
+    }
+
+    /// Runs the install and post-install verification off the main actor, keeping
+    /// the plist read off the main thread. Returns the (Sendable) failure message
+    /// (`nil` on success) and whether the runtime is now present.
+    private static func performInstall(tarball: URL) async -> (failureMessage: String?, installed: Bool) {
+        await Task.detached {
+            do {
+                try WhiskyWineInstaller.install(from: tarball)
+                return (nil, WhiskyWineInstaller.isWhiskyWineInstalled())
+            } catch {
+                return (error.localizedDescription, false)
+            }
+        }.value
+    }
+
+    /// Trims a possibly long, multi-line underlying error (e.g. raw `tar` output)
+    /// down to a single short line for the install error message. The full text
+    /// is preserved in the diagnostics report.
+    private static func shortened(_ message: String, limit: Int = 200) -> String {
+        let firstLine = message.split(whereSeparator: \.isNewline).first.map(String.init) ?? message
+        let trimmed = firstLine.trimmingCharacters(in: .whitespaces)
+        return trimmed.count <= limit ? trimmed : String(trimmed.prefix(limit)) + "…"
     }
 }
