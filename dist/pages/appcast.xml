@@ -6,6 +6,29 @@
         <description>Whisky update feed</description>
         <language>en</language>
         <item>
+            <title>Whisky 3.2.0</title>
+            <pubDate>Wed, 10 Jun 2026 04:57:38 +0000</pubDate>
+            <sparkle:version>47</sparkle:version>
+            <sparkle:shortVersionString>3.2.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <p>Verified Wine downloads, plus clearer and earlier errors when something goes wrong.</p>
+                <ul>
+                    <li>The Wine runtime download is now verified against a published SHA-256 before install — a corrupted or truncated download is caught and retried instead of unpacking a broken runtime.</li>
+                    <li>Bottle creation validates the chosen location up front: a non-writable folder or a nearly-full disk now gives a clear error instead of the bottle silently disappearing.</li>
+                    <li>Runtime install failures surface their specific cause (missing tarball, disk full, extraction failure) instead of being swallowed.</li>
+                    <li>A half-installed runtime is now detected and prompts a clean re-install instead of leaving every bottle to fail with cryptic Wine errors.</li>
+                    <li>Bottle-creation error messages are now localizable.</li>
+                </ul>
+                <p>See the <a href="https://github.com/frankea/Whisky/releases/tag/app-v3.2.0">release notes</a> for the full changelog.</p>
+            ]]></description>
+            <enclosure
+                url="https://github.com/frankea/Whisky/releases/download/app-v3.2.0/Whisky-3.2.0.dmg"
+                sparkle:edSignature="OVPbzjcAElM42lbI3A2yWIX+PdzN6RkEsP/iRWRqfxqh07O1FVmWB4gOvuyyukIdQ1V3QQ/pr3hc7joTOSjnBQ=="
+                length="8562282"
+                type="application/octet-stream" />
+        </item>
+        <item>
             <title>Whisky 3.1.0</title>
             <pubDate>Tue, 09 Jun 2026 01:26:40 +0000</pubDate>
             <sparkle:version>46</sparkle:version>
