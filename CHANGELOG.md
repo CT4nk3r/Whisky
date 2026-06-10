@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   install check now requires the `wine64` binary on disk, not just the version
   file, so a partial extraction or removal prompts a clean re-install instead of
   leaving every bottle to fail with cryptic Wine errors.
+- Bottle-creation error messages are now localizable instead of English-only,
+  so non-English users see translated text when creation fails.
 
 ### Documentation
 - Landing page (`frankea.github.io/Whisky`) now shows app screenshots, adds an
