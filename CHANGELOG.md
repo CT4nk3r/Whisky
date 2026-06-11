@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.3.0] - 2026-06-11 (App)
+
 ### Added
 - Optional, **opt-in** anonymous usage telemetry. A checkbox during first-run
   setup (off by default, changeable anytime in Settings → Privacy) enables five
