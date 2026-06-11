@@ -6,6 +6,29 @@
         <description>Whisky update feed</description>
         <language>en</language>
         <item>
+            <title>Whisky 3.3.0</title>
+            <pubDate>Thu, 11 Jun 2026 13:24:59 +0000</pubDate>
+            <sparkle:version>48</sparkle:version>
+            <sparkle:shortVersionString>3.3.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <p>Crash-safe, forward-compatible bottle settings, hardened icon parsing, and optional opt-in anonymous telemetry.</p>
+                <ul>
+                    <li>Bottle and per-program settings are now written atomically, so a crash mid-save can no longer wipe your configuration.</li>
+                    <li>Settings written by a newer Whisky load gracefully — an unrecognized choice falls back to its default instead of failing to load the whole bottle.</li>
+                    <li>An unreadable settings file is now preserved (moved aside for recovery) instead of being silently overwritten.</li>
+                    <li>Hardened icon and thumbnail extraction against crafted or corrupt Windows executables that could previously crash or hang the parser.</li>
+                    <li>Optional, <strong>opt-in</strong> anonymous usage telemetry (off by default) to surface first-run install failures — no personal data, paths, or error text is ever sent.</li>
+                </ul>
+                <p>See the <a href="https://github.com/frankea/Whisky/releases/tag/app-v3.3.0">release notes</a> for the full changelog.</p>
+            ]]></description>
+            <enclosure
+                url="https://github.com/frankea/Whisky/releases/download/app-v3.3.0/Whisky-3.3.0.dmg"
+                sparkle:edSignature="aZLZZgc1MRj3ZRiTY2kJerE3JMG+lq7R7r9GfD1J6eZS5lpYW/bEnp5ZiyhP/0AHUQYbJEDZUKJR2JNIYhkUDQ=="
+                length="9005652"
+                type="application/octet-stream" />
+        </item>
+        <item>
             <title>Whisky 3.2.0</title>
             <pubDate>Wed, 10 Jun 2026 04:57:38 +0000</pubDate>
             <sparkle:version>47</sparkle:version>
