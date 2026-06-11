@@ -23,9 +23,19 @@ struct WelcomeView: View {
     @State var rosettaInstalled: Bool?
     @State var whiskyWineInstalled: Bool?
     @State var shouldCheckInstallStatus: Bool = false
+    @AppStorage(Telemetry.consentDefaultsKey) private var telemetryConsentRaw: String = Telemetry.ConsentState
+        .undecided.rawValue
     @Binding var path: [SetupStage]
     @Binding var showSetup: Bool
     var firstTime: Bool
+
+    /// Opt-in checkbox state; writing records the explicit choice.
+    private var telemetryOptIn: Binding<Bool> {
+        Binding(
+            get: { telemetryConsentRaw == Telemetry.ConsentState.granted.rawValue },
+            set: { Telemetry.setConsent(granted: $0) }
+        )
+    }
 
     var body: some View {
         VStack {
@@ -70,6 +80,16 @@ struct WelcomeView: View {
                 checkInstallStatus()
             }
             Spacer()
+            // Shown unconditionally on the welcome screen, which is reached on a
+            // genuine first run: SetupView only skips this screen once telemetry
+            // consent is decided, so a first-run user always sees this opt-in.
+            Toggle(isOn: telemetryOptIn) {
+                Text("setup.telemetry.consent")
+                    .font(.caption)
+            }
+            .toggleStyle(.checkbox)
+            .help("setup.telemetry.consent.help")
+            .padding(.bottom, 4)
             HStack {
                 if let rosettaInstalled,
                    let whiskyWineInstalled {
@@ -97,7 +117,7 @@ struct WelcomeView: View {
                 }
             }
         }
-        .frame(width: 400, height: 200)
+        .frame(width: 400, height: 230)
     }
 
     func checkInstallStatus() {

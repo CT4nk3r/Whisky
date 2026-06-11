@@ -143,9 +143,10 @@ struct WhiskyWineInstallView: View {
 
             let capturedTarURL = tarLocation
             diagnostics.record("Invoking WhiskyWineInstaller.install(from:) in detached task")
-            let (installFailureMessage, isInstalled) = await Self.performInstall(tarball: capturedTarURL)
-            if let installFailureMessage {
-                diagnostics.record("Install failed: \(installFailureMessage)")
+            let outcome = await Self.performInstall(tarball: capturedTarURL)
+            let isInstalled = outcome.installed
+            if case let .failure(_, message?) = outcome {
+                diagnostics.record("Install failed: \(message)")
             }
             let installStatus = isInstalled ? "installed" : "not installed"
             diagnostics.record(
@@ -162,16 +163,7 @@ struct WhiskyWineInstallView: View {
             diagnostics.record("Install attempt \(attemptNumber) finished (\(attemptResult))")
             diagnostics.record(finishLogMessage)
             installing = false
-            if isInstalled {
-                installError = nil
-            } else if let installFailureMessage {
-                installError = String(
-                    format: String(localized: "setup.whiskywine.error.installFailed.detail"),
-                    Self.shortened(installFailureMessage)
-                )
-            } else {
-                installError = String(localized: "setup.whiskywine.error.installFailed")
-            }
+            applyInstallOutcome(outcome)
             guard isInstalled else { return }
             // Only cleanup tarball after verified successful installation
             // This preserves it for retry attempts if installation fails
@@ -181,16 +173,54 @@ struct WhiskyWineInstallView: View {
         }
     }
 
-    /// Runs the install and post-install verification off the main actor, keeping
-    /// the plist read off the main thread. Returns the (Sendable) failure message
-    /// (`nil` on success) and whether the runtime is now present.
-    private static func performInstall(tarball: URL) async -> (failureMessage: String?, installed: Bool) {
+    /// Reports the funnel event and sets the user-facing error state.
+    @MainActor
+    private func applyInstallOutcome(_ outcome: InstallOutcome) {
+        switch outcome {
+        case .success:
+            Telemetry.capture(.runtimeInstallSucceeded)
+            installError = nil
+        case let .failure(reason, message):
+            Telemetry.capture(.runtimeInstallFailed(reason: reason))
+            if let message {
+                installError = String(
+                    format: String(localized: "setup.whiskywine.error.installFailed.detail"),
+                    Self.shortened(message)
+                )
+            } else {
+                installError = String(localized: "setup.whiskywine.error.installFailed")
+            }
+        }
+    }
+
+    /// Outcome of an install attempt. The failure case carries the coarse
+    /// telemetry reason (decided where the error is known) and an optional
+    /// user-facing message; illegal combinations are unrepresentable.
+    private enum InstallOutcome {
+        case success
+        case failure(reason: Telemetry.InstallFailureReason, message: String?)
+
+        var installed: Bool {
+            if case .success = self { return true }
+            return false
+        }
+    }
+
+    /// Runs the install and post-install verification off the main actor,
+    /// keeping the plist read off the main thread.
+    private static func performInstall(tarball: URL) async -> InstallOutcome {
         await Task.detached {
             do {
                 try WhiskyWineInstaller.install(from: tarball)
-                return (nil, WhiskyWineInstaller.isWhiskyWineInstalled())
+                guard WhiskyWineInstaller.isWhiskyWineInstalled() else {
+                    // Extraction reported success but the runtime isn't usable.
+                    return .failure(reason: .runtimeIncomplete, message: nil)
+                }
+                return .success
             } catch {
-                return (error.localizedDescription, false)
+                let reason: Telemetry.InstallFailureReason =
+                    (error as? WhiskyWineInstallError) == .tarballNotFound ? .tarballMissing : .extractFailed
+                return .failure(reason: reason, message: error.localizedDescription)
             }
         }.value
     }
