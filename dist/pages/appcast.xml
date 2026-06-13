@@ -6,6 +6,28 @@
         <description>Whisky update feed</description>
         <language>en</language>
         <item>
+            <title>Whisky 3.4.0</title>
+            <pubDate>Sat, 13 Jun 2026 18:01:53 +0000</pubDate>
+            <sparkle:version>49</sparkle:version>
+            <sparkle:shortVersionString>3.4.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <p>Per-bottle DXMT (Direct3D 11 → Metal) — an experimental graphics backend you can pick per bottle or per program — plus reliability fixes.</p>
+                <ul>
+                    <li><strong>DXMT (Experimental)</strong>: a new Direct3D 11 → Metal backend, selectable per bottle/program from the graphics picker and deployed like DXVK so it never affects other bottles. D3DMetal remains the recommended default; the backend card prompts you to update the runtime when it's needed.</li>
+                    <li>Installing or updating the Wine runtime no longer erases the rest of Whisky's Application Support folder.</li>
+                    <li>Per-program graphics overrides now reliably win over the bottle's setting.</li>
+                    <li>A launch error for a program opened from Finder now surfaces as a notification instead of failing silently.</li>
+                </ul>
+                <p>See the <a href="https://github.com/frankea/Whisky/releases/tag/app-v3.4.0">release notes</a> for the full changelog.</p>
+            ]]></description>
+            <enclosure
+                url="https://github.com/frankea/Whisky/releases/download/app-v3.4.0/Whisky-3.4.0.dmg"
+                sparkle:edSignature="yplZQrTb16jrfuJnSTQsP5PE8uHppVdO+yZpJeQUuXvnqadc2M6gTc7xbWtDpB6JwisAOzFmhN+ji64oz5EpDA=="
+                length="9035558"
+                type="application/octet-stream" />
+        </item>
+        <item>
             <title>Whisky 3.3.0</title>
             <pubDate>Thu, 11 Jun 2026 13:24:59 +0000</pubDate>
             <sparkle:version>48</sparkle:version>
