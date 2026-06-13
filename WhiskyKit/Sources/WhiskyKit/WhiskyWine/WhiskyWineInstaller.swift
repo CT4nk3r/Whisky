@@ -16,6 +16,7 @@
 //  If not, see https://www.gnu.org/licenses/.
 //
 
+// swiftlint:disable file_length
 import CryptoKit
 import Foundation
 import os
@@ -359,6 +360,14 @@ public class WhiskyWineInstaller {
     /// not record a DXVK version.
     public static func whiskyWineDXVKVersion() -> String? {
         whiskyWineInfo()?.dxvkVersion
+    }
+
+    /// The bundled DXMT version recorded in the installed runtime's version
+    /// plist, or `nil` if WhiskyWine is not installed or the runtime predates
+    /// the DXMT payload (< v3.1.0). `nil` means the DXMT graphics backend is
+    /// unavailable.
+    public static func whiskyWineDXMTVersion() -> String? {
+        whiskyWineInfo()?.dxmtVersion
     }
 
     /// Reads the full version record from the installed WhiskyWine runtime.

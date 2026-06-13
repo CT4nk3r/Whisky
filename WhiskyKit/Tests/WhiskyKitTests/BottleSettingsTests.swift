@@ -416,6 +416,32 @@ final class BottleSettingsTests: XCTestCase {
         XCTAssertEqual(reloaded.backend, .recommended)
     }
 
+    func testDXMTAvailabilityFollowsRuntimeRecord() {
+        let withDXMT = WhiskyWineVersion(version: SemanticVersion(3, 1, 0), dxmtVersion: "0.80")
+        let withoutDXMT = WhiskyWineVersion(version: SemanticVersion(3, 0, 0))
+
+        XCTAssertTrue(GraphicsBackend.dxmt.isAvailable(runtimeInfo: withDXMT))
+        XCTAssertFalse(GraphicsBackend.dxmt.isAvailable(runtimeInfo: withoutDXMT))
+        XCTAssertFalse(GraphicsBackend.dxmt.isAvailable(runtimeInfo: nil), "No runtime installed: DXMT unavailable")
+
+        // Every other backend is runtime-independent.
+        for backend in GraphicsBackend.allCases where backend != .dxmt {
+            XCTAssertTrue(backend.isAvailable(runtimeInfo: nil), "\(backend) should always be available")
+        }
+    }
+
+    func testDXMTBackendRoundTrips() throws {
+        XCTAssertEqual(GraphicsBackend.dxmt.rawValue, "dxmt")
+
+        var config = BottleGraphicsConfig()
+        config.backend = .dxmt
+        let encoder = PropertyListEncoder()
+        encoder.outputFormat = .xml
+        let data = try encoder.encode(config)
+        let decoded = try PropertyListDecoder().decode(BottleGraphicsConfig.self, from: data)
+        XCTAssertEqual(decoded.backend, .dxmt)
+    }
+
     // MARK: - Settings-Tree Forward Compatibility
 
     /// Encodes `settings`, swaps `original` for `replacement` in the produced plist XML to

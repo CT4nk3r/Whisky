@@ -82,6 +82,9 @@ private let logger = Logger(subsystem: Bundle.whiskyBundleIdentifier, category: 
 public class Wine {
     /// URL to the installed DXVK folder containing Direct3D-to-Vulkan translation libraries.
     private static let dxvkFolder: URL = WhiskyWineInstaller.libraryFolder.appending(path: "DXVK")
+    /// URL to the installed DXMT payload containing Direct3D-11-to-Metal translation libraries.
+    /// Absent on runtimes older than Wine Libraries 3.1.0.
+    private static let dxmtFolder: URL = WhiskyWineInstaller.libraryFolder.appending(path: "DXMT")
     /// The URL to the `wine64` binary executable.
     ///
     /// This is the main Wine binary used to execute Windows applications.
@@ -241,8 +244,27 @@ public class Wine {
         // before calling this method. The detection logic uses LauncherDetection utility
         // which is in the Whisky app target, not WhiskyKit framework.
 
-        // Enable DXVK if needed (either explicitly enabled or auto-enabled for launchers)
-        let shouldEnableDXVK = bottle.settings.dxvk ||
+        // The effective backend for this launch: a program-level override wins
+        // over the bottle setting, and `.recommended` resolves to its concrete
+        // backend. This decides which translation layer's files are deployed;
+        // the matching WINEDLLOVERRIDES come from the environment layers.
+        let effectiveBackendChoice = programOverrides?.graphicsBackend ?? bottle.settings.graphicsBackend
+        let effectiveBackend = effectiveBackendChoice == .recommended
+            ? GraphicsBackendResolver.resolve()
+            : effectiveBackendChoice
+
+        // DXMT first: if launcher auto-DXVK also fires below (e.g. Rockstar),
+        // DXVK's file copy deterministically wins, matching the override-layer
+        // order where launcher-managed entries land after bottle-managed ones.
+        if effectiveBackend == .dxmt {
+            try enableDXMT(bottle: bottle)
+        }
+
+        // Enable DXVK if needed: effective backend, the legacy program-level
+        // flag (honored only without a backend override, mirroring
+        // applyProgramOverrides), or launcher auto-enable.
+        let legacyProgramDXVK = programOverrides?.graphicsBackend == nil && programOverrides?.dxvk == true
+        let shouldEnableDXVK = effectiveBackend == .dxvk || legacyProgramDXVK ||
             (bottle.settings.autoEnableDXVK &&
                 bottle.settings.detectedLauncher?.requiresDXVK == true)
 
@@ -617,6 +639,114 @@ public class Wine {
             in: bottle.url.appending(path: "drive_c").appending(path: "windows").appending(path: "syswow64"),
             withContentsIn: Wine.dxvkFolder.appending(path: "x32")
         )
+    }
+
+    /// Errors thrown by ``enableDXMT(bottle:)``.
+    public enum DXMTError: LocalizedError, Equatable {
+        /// The installed runtime does not carry the DXMT payload (Wine
+        /// Libraries < 3.1.0, or a damaged install).
+        case payloadMissing
+
+        public var errorDescription: String? {
+            switch self {
+            case .payloadMissing:
+                String(localized: "wine.dxmt.error.payloadMissing")
+            }
+        }
+    }
+
+    /// Installs DXMT into a bottle so its Direct3D-11-to-Metal layer is used.
+    ///
+    /// Copies the D3D translation trio (`d3d11`, `dxgi`, `d3d10core`) from the
+    /// runtime's DXMT payload into the bottle's system directories, where the
+    /// `n,b` overrides from ``DLLOverrideResolver/dxmtPreset`` select them.
+    /// Also ensures DXMT's `winemetal.dll` is installed as a Wine *builtin*
+    /// next to its `winemetal.so` unixlib half — the bridge only works for
+    /// builtin-loaded modules, and the Wine build ships a stale stub there
+    /// that a runtime update restores, so this placement is re-checked on
+    /// every launch.
+    ///
+    /// - Parameter bottle: The ``Bottle`` to install DXMT into.
+    /// - Throws: ``DXMTError/payloadMissing`` when the runtime has no DXMT
+    ///   payload, or a `CocoaError` if a copy fails.
+    ///
+    /// - Note: This is automatically called by `runProgram` when the effective
+    ///   graphics backend is `.dxmt`.
+    @MainActor
+    public static func enableDXMT(bottle: Bottle) throws {
+        try enableDXMT(
+            payloadRoot: Wine.dxmtFolder,
+            wineLibRoot: WhiskyWineInstaller.libraryFolder
+                .appending(path: "Wine").appending(path: "lib").appending(path: "wine"),
+            prefixRoot: bottle.url
+        )
+    }
+
+    /// Performs the DXMT installation against explicit roots. Factored out of
+    /// ``enableDXMT(bottle:)`` so the file placement can be tested against
+    /// temporary directories (mirrors `WhiskyWineInstaller.install(tarball:into:)`).
+    static func enableDXMT(payloadRoot: URL, wineLibRoot: URL, prefixRoot: URL) throws {
+        let fileManager = FileManager.default
+        let x64Payload = payloadRoot.appending(path: "x64")
+        let x32Payload = payloadRoot.appending(path: "x32")
+
+        // The D3D translation trio that conflicts with Wine's builtins; only
+        // these enter the prefix. winemetal must stay builtin, and the NVIDIA
+        // extras (nvapi64/nvngx) are deliberately not deployed.
+        let translationTrio = ["d3d11.dll", "dxgi.dll", "d3d10core.dll"]
+
+        let windowsDir = prefixRoot.appending(path: "drive_c").appending(path: "windows")
+        let system32 = windowsDir.appending(path: "system32")
+        let syswow64 = windowsDir.appending(path: "syswow64")
+        let i386Builtin = wineLibRoot.appending(path: "i386-windows")
+        let deploy32Bit = fileManager.fileExists(atPath: syswow64.path(percentEncoded: false))
+        let deployI386Builtin = fileManager.fileExists(atPath: i386Builtin.path(percentEncoded: false))
+
+        // Validate every source we are about to copy BEFORE touching any
+        // destination. A damaged runtime (e.g. the trio present but winemetal
+        // missing) must fail with the actionable payloadMissing error rather than
+        // half-deploying and deleting the existing builtin winemetal on the way.
+        var required: [URL] = (translationTrio + ["winemetal.dll"]).map { x64Payload.appending(path: $0) }
+        if deploy32Bit {
+            required += translationTrio.map { x32Payload.appending(path: $0) }
+        }
+        if deployI386Builtin {
+            required.append(x32Payload.appending(path: "winemetal.dll"))
+        }
+        guard required.allSatisfy({ fileManager.fileExists(atPath: $0.path(percentEncoded: false)) }) else {
+            throw DXMTError.payloadMissing
+        }
+
+        for name in translationTrio {
+            try fileManager.installFileIfContentDiffers(
+                at: system32.appending(path: name),
+                from: x64Payload.appending(path: name)
+            )
+        }
+
+        // 32-bit half: only when the prefix actually has a syswow64 tree.
+        if deploy32Bit {
+            for name in translationTrio {
+                try fileManager.installFileIfContentDiffers(
+                    at: syswow64.appending(path: name),
+                    from: x32Payload.appending(path: name)
+                )
+            }
+        }
+
+        // winemetal.dll builtin placement, paired with the runtime's
+        // winemetal.so. Content-compared so the call is idempotent and
+        // self-heals after a runtime update restores the stale stub.
+        try fileManager.installFileIfContentDiffers(
+            at: wineLibRoot.appending(path: "x86_64-windows").appending(path: "winemetal.dll"),
+            from: x64Payload.appending(path: "winemetal.dll")
+        )
+        if deployI386Builtin {
+            try fileManager.installFileIfContentDiffers(
+                at: i386Builtin.appending(path: "winemetal.dll"),
+                from: x32Payload.appending(path: "winemetal.dll")
+            )
+        }
     }
 }
 
