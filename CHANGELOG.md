@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.4.0] - 2026-06-13 (App)
+
 ### Added
 - DXMT (Direct3D 11 → Metal) as a selectable per-bottle and per-program
   graphics backend, marked Experimental. Deployed per-bottle like DXVK
