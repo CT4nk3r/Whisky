@@ -102,6 +102,10 @@ public final class Bottle: ObservableObject, Equatable, Hashable, Identifiable, 
     /// Indicates whether the bottle's directory exists and is accessible.
     public var isAvailable: Bool = false
 
+    /// The in-flight program scan, if any, used to coalesce concurrent rescans.
+    /// See ``coalesceProgramScan(_:)``.
+    private var programScanTask: Task<Void, Never>?
+
     // MARK: - Cross-actor access (nonisolated members on @MainActor Bottle)
 
     /// The unique identifier for this bottle.
@@ -288,6 +292,34 @@ public final class Bottle: ObservableObject, Equatable, Hashable, Identifiable, 
             }
         }
         return found
+    }
+
+    /// Runs a program rescan, coalescing concurrent callers onto one scan.
+    ///
+    /// If a scan is already in flight this awaits *that* scan instead of starting
+    /// a duplicate or returning early. The distinction matters versus an
+    /// early-return guard: a caller that bailed out would then read whatever
+    /// ``programs`` happened to hold (e.g. the Start Menu auto-pin pinning against
+    /// an empty list), whereas awaiting means the caller observes the in-flight
+    /// scan's freshly published results before it proceeds. The owning call clears
+    /// the handle when its scan finishes, so the next call starts a fresh scan.
+    ///
+    /// The coalesced result reflects the in-flight scan, which began at the
+    /// *owning* call — so a caller that must observe a change it made after that
+    /// scan started should rescan once the current one completes.
+    ///
+    /// - Parameter scan: The rescan body; should publish into ``programs`` and
+    ///   manage ``programsLoading``. Only the owning call runs it — coalesced
+    ///   callers just await the shared result.
+    public func coalesceProgramScan(_ scan: @escaping @MainActor () async -> Void) async {
+        if let existing = programScanTask {
+            await existing.value
+            return
+        }
+        let task = Task { @MainActor in await scan() }
+        programScanTask = task
+        defer { programScanTask = nil }
+        await task.value
     }
 
     // MARK: - Equatable
