@@ -6,6 +6,28 @@
         <description>Whisky update feed</description>
         <language>en</language>
         <item>
+            <title>Whisky 3.5.0</title>
+            <pubDate>Sun, 14 Jun 2026 05:08:21 +0000</pubDate>
+            <sparkle:version>50</sparkle:version>
+            <sparkle:shortVersionString>3.5.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <p>Quality-of-life improvements: clearer bottle settings, an optional menu-bar item, smoother bottle loading, and less intrusive update prompts.</p>
+                <ul>
+                    <li><strong>Inline configuration help</strong>: bottle configuration options now show a one-line description of what each does — across the Wine section (Windows version, build, enhanced sync, DPI, Retina) and the DXVK section (DXVK, async, HUD).</li>
+                    <li><strong>Optional menu-bar extra</strong> (off by default, in Settings → General): launch a bottle's pinned programs, reopen Whisky, or quit without the main window — and keep Whisky and its running Wine processes alive after the window is closed.</li>
+                    <li>Scanning a bottle for installed programs now runs off the main thread, so opening or switching to a large bottle no longer hitches the UI.</li>
+                    <li>Gentler update reminders: a scheduled background check that finds a new version shows a Dock badge and an "Install Update…" menu item instead of a focus-stealing dialog.</li>
+                </ul>
+                <p>See the <a href="https://github.com/frankea/Whisky/releases/tag/app-v3.5.0">release notes</a> for the full changelog.</p>
+            ]]></description>
+            <enclosure
+                url="https://github.com/frankea/Whisky/releases/download/app-v3.5.0/Whisky-3.5.0.dmg"
+                sparkle:edSignature="70TN4bpEjjU7SdlhNwIqP88ll7QkQPgAFNr1VNPiPdv5r8MOvbk73O0mxHCX6q4CGLu7kzn7LGw6Mdk44dFSDw=="
+                length="9067079"
+                type="application/octet-stream" />
+        </item>
+        <item>
             <title>Whisky 3.4.0</title>
             <pubDate>Sat, 13 Jun 2026 18:01:53 +0000</pubDate>
             <sparkle:version>49</sparkle:version>
