@@ -6,6 +6,25 @@
         <description>Whisky update feed</description>
         <language>en</language>
         <item>
+            <title>Whisky 3.5.1</title>
+            <pubDate>Fri, 24 Jul 2026 09:06:06 +0000</pubDate>
+            <sparkle:version>51</sparkle:version>
+            <sparkle:shortVersionString>3.5.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <p>Bug-fix release: installing bottle dependencies now works out of the box.</p>
+                <ul>
+                    <li><strong>Dependency installs fixed</strong>: installing components like the Visual C++ runtime, .NET, DirectX, and fonts (and the Winetricks verb browser) failed on a clean install because the <code>winetricks</code> tool was never bundled. It — and its verb catalog — now ship inside the app, so dependency installation works with no extra setup.</li>
+                </ul>
+                <p>See the <a href="https://github.com/frankea/Whisky/releases/tag/app-v3.5.1">release notes</a> for the full changelog.</p>
+            ]]></description>
+            <enclosure
+                url="https://github.com/frankea/Whisky/releases/download/app-v3.5.1/Whisky-3.5.1.dmg"
+                sparkle:edSignature="zMMDJ99vi/kDl8hNaPfuT1bqxKNAFHS5qlYexIh6K3KIozMscK4BVO3G3/BbBDR9hHOt5kGNhBnfYu5sSvBCAA=="
+                length="9286465"
+                type="application/octet-stream" />
+        </item>
+        <item>
             <title>Whisky 3.5.0</title>
             <pubDate>Sun, 14 Jun 2026 05:08:21 +0000</pubDate>
             <sparkle:version>50</sparkle:version>
