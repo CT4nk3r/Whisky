@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.5.1] - 2026-07-24 (App)
+
 ### Fixed
 - Installing bottle dependencies (VC++, .NET, DirectX, fonts) and the Winetricks
   verb browser now work out of the box. `winetricks` was expected inside the
