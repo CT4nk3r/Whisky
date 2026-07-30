@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- First-run engine setup no longer fails with "Archive contains unsafe path"
+  on systems whose language formats dates day-first (e.g. UK or French
+  locales). The archive safety check parsed tar's localized listing and
+  wrongly rejected every entry; the listing now runs with a pinned locale so
+  it reads the same everywhere (Fixes #139).
 - An unreadable bottle registry no longer silently wipes the bottle list. On
   startup the corrupt file is moved aside (an alert says where) and, when the
   file is in the older paths-only fallback format, the bottle paths are
