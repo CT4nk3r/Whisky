@@ -28,6 +28,11 @@ private struct BottleDataMinimal: Codable {
 // MARK: - BottleData
 
 public struct BottleData: Codable {
+    private enum CodingKeys: String, CodingKey {
+        case fileVersion
+        case paths
+    }
+
     public static let containerDir = FileManager.default.homeDirectoryForCurrentUser
         .appending(path: "Library")
         .appending(path: "Containers")
@@ -43,6 +48,17 @@ public struct BottleData: Codable {
     static let currentVersion = SemanticVersion(1, 0, 0)
 
     private var fileVersion: SemanticVersion
+
+    /// The registry file this instance reads and writes. Defaults to
+    /// ``bottleEntriesDir``; injectable so tests can run against a temp
+    /// directory instead of the user's real registry. Never persisted.
+    var entriesFile: URL = BottleData.bottleEntriesDir
+
+    /// Non-nil when ``init()`` found an existing registry file it couldn't
+    /// read and moved it aside instead of overwriting it, so the UI can tell
+    /// the user where their old bottle list went. Never persisted.
+    public private(set) var corruptRegistryBackupURL: URL?
+
     public var paths: [URL] = [] {
         didSet {
             encode()
@@ -50,11 +66,30 @@ public struct BottleData: Codable {
     }
 
     public init() {
+        self.init(entriesFile: Self.bottleEntriesDir)
+    }
+
+    /// Reads or creates the registry at `entriesFile`. Factored out of
+    /// ``init()`` so it can be tested against a temp directory.
+    init(entriesFile: URL) {
+        self.entriesFile = entriesFile
         fileVersion = Self.currentVersion
 
         if !decode() {
             encode()
         }
+    }
+
+    private init(
+        fileVersion: SemanticVersion,
+        paths: [URL],
+        corruptRegistryBackupURL: URL?,
+        entriesFile: URL
+    ) {
+        self.fileVersion = fileVersion
+        self.paths = paths
+        self.corruptRegistryBackupURL = corruptRegistryBackupURL
+        self.entriesFile = entriesFile
     }
 
     @MainActor
@@ -77,22 +112,107 @@ public struct BottleData: Codable {
         return bottles
     }
 
+    /// Appends a bottle path to the registry and verifies the entries file on
+    /// disk actually contains it afterwards, so a failed save can't silently
+    /// drop the bottle on the next launch (issue #61).
+    ///
+    /// - Returns: `true` when the path is durably persisted.
+    public mutating func registerBottlePath(_ url: URL) -> Bool {
+        if !paths.contains(url) {
+            paths.append(url) // didSet persists via encode()
+        }
+        return persistedPaths()?.contains(url) ?? false
+    }
+
+    /// Reads the bottle paths back from the entries file, accepting both the
+    /// full and the minimal (fallback) encodings.
+    private func persistedPaths() -> [URL]? {
+        guard let data = try? Data(contentsOf: entriesFile) else { return nil }
+        let decoder = PropertyListDecoder()
+        if let full = try? decoder.decode(BottleData.self, from: data) {
+            return full.paths
+        }
+        if let minimal = try? decoder.decode(BottleDataMinimal.self, from: data) {
+            return minimal.paths
+        }
+        return nil
+    }
+
+    /// Rebuilds self at the current version, carrying entriesFile over
+    /// explicitly: it's excluded from Codable, so a decoded value always
+    /// holds the production default and must never supply it.
+    private func replacement(paths: [URL], corruptRegistryBackupURL: URL? = nil) -> BottleData {
+        BottleData(
+            fileVersion: Self.currentVersion,
+            paths: paths,
+            corruptRegistryBackupURL: corruptRegistryBackupURL,
+            entriesFile: entriesFile
+        )
+    }
+
     @discardableResult
     private mutating func decode() -> Bool {
         let decoder = PropertyListDecoder()
+        let data: Data
         do {
-            let data = try Data(contentsOf: Self.bottleEntriesDir)
-            self = try decoder.decode(BottleData.self, from: data)
-            let loadedVersion = self.fileVersion
-            let currentVersion = Self.currentVersion
-            if loadedVersion != currentVersion {
-                Logger.wineKit.warning("Invalid file version \(loadedVersion), expected \(currentVersion)")
+            data = try Data(contentsOf: entriesFile)
+        } catch {
+            // Missing entries file: first run, start with an empty registry.
+            Logger.wineKit.error("Failed to read BottleData: \(error)")
+            return false
+        }
+        do {
+            let decoded = try decoder.decode(BottleData.self, from: data)
+            if decoded.fileVersion != Self.currentVersion {
+                Logger.wineKit.warning(
+                    "Invalid file version \(decoded.fileVersion), expected \(Self.currentVersion)"
+                )
+                // Keep the registered paths; init() re-encodes them in the
+                // current format instead of discarding them.
+                self = replacement(paths: decoded.paths)
                 return false
             }
+            self = replacement(paths: decoded.paths)
             return true
         } catch {
             Logger.wineKit.error("Failed to decode BottleData: \(error)")
+        }
+        // The full decode failed on an existing file. Salvage the paths-only
+        // shape written by encodeFallback() before treating it as corrupt.
+        if let minimal = try? decoder.decode(BottleDataMinimal.self, from: data) {
+            Logger.wineKit.warning("Recovered \(minimal.paths.count) bottle path(s) from minimal registry")
+            self = replacement(paths: minimal.paths)
             return false
+        }
+        // Truly unreadable: move the file aside so the fresh registry written
+        // by init() doesn't destroy the user's bottle list (issue #61).
+        self = replacement(
+            paths: [],
+            corruptRegistryBackupURL: Self.backUpCorruptRegistry(at: entriesFile)
+        )
+        return false
+    }
+
+    /// Moves an unreadable registry file aside, returning the backup location.
+    private static func backUpCorruptRegistry(at file: URL) -> URL? {
+        let fileManager = FileManager.default
+        guard fileManager.fileExists(atPath: file.path(percentEncoded: false)) else {
+            return nil
+        }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyyMMdd-HHmmss"
+        let name = file.deletingPathExtension().lastPathComponent
+        let backupURL = file
+            .deletingLastPathComponent()
+            .appending(path: "\(name).corrupt-\(formatter.string(from: Date())).plist")
+        do {
+            try fileManager.moveItem(at: file, to: backupURL)
+            Logger.wineKit.warning("Moved unreadable bottle registry to \(backupURL.path)")
+            return backupURL
+        } catch {
+            Logger.wineKit.error("Failed to back up unreadable bottle registry: \(error)")
+            return nil
         }
     }
 
@@ -102,9 +222,12 @@ public struct BottleData: Codable {
         encoder.outputFormat = .xml
 
         do {
-            try FileManager.default.createDirectory(at: Self.containerDir, withIntermediateDirectories: true)
+            try FileManager.default.createDirectory(
+                at: entriesFile.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
             let data = try encoder.encode(self)
-            try data.write(to: Self.bottleEntriesDir, options: .atomic)
+            try data.write(to: entriesFile, options: .atomic)
             return true
         } catch {
             Logger.wineKit.error("Failed to encode BottleData: \(error)")
@@ -119,11 +242,14 @@ public struct BottleData: Codable {
         encoder.outputFormat = .xml
 
         do {
-            try FileManager.default.createDirectory(at: Self.containerDir, withIntermediateDirectories: true)
+            try FileManager.default.createDirectory(
+                at: entriesFile.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
             // Create a minimal BottleData with just the paths
             let fallbackData = BottleDataMinimal(paths: self.paths)
             let data = try encoder.encode(fallbackData)
-            try data.write(to: Self.bottleEntriesDir, options: .atomic)
+            try data.write(to: entriesFile, options: .atomic)
             return true
         } catch {
             Logger.wineKit.error("Failed to encode fallback BottleData: \(error)")
