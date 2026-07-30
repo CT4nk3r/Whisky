@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- The "Recommended" graphics backend now resolves to one the installed
+  runtime actually provides: DXMT when the runtime bundles it, otherwise
+  DXVK, and D3DMetal only when its payload is present. Previously it always
+  chose D3DMetal, which the runtime doesn't ship, so fresh bottles silently
+  fell back to wined3d and DirectX 11 games failed to launch out of the box
+  (Fixes #141).
 - First-run engine setup no longer fails with "Archive contains unsafe path"
   on systems whose language formats dates day-first (e.g. UK or French
   locales). The archive safety check parsed tar's localized listing and
