@@ -6,6 +6,29 @@
         <description>Whisky update feed</description>
         <language>en</language>
         <item>
+            <title>Whisky 3.5.2</title>
+            <pubDate>Wed, 30 Jul 2026 16:35:00 +0000</pubDate>
+            <sparkle:version>52</sparkle:version>
+            <sparkle:shortVersionString>3.5.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <p>Bug-fix release: fresh installs work in every locale, DirectX 11 games run on default settings, and lost bottles come back.</p>
+                <ul>
+                    <li><strong>Engine install fixed for day-first-date locales</strong>: first-run setup failed with "Archive contains unsafe path" on systems whose language formats dates day-first (UK, French, and many others). The archive safety check no longer depends on the system language.</li>
+                    <li><strong>DirectX 11 games work on default settings</strong>: the "Recommended" graphics backend now picks a translation layer the installed engine actually provides (DXMT, or DXVK) instead of one it doesn't ship, which made DX11 games fail to launch on a fresh install.</li>
+                    <li><strong>Backend picker honesty</strong>: D3DMetal is greyed out when the engine doesn't include it, and bottles already set to D3DMetal show a clear warning instead of games failing silently.</li>
+                    <li><strong>Lost bottles are recovered</strong>: bottles on disk that aren't in your library — after a reset registry or a restored backup — are detected at startup and offered for one-click re-import. A damaged bottle list is also backed up and recovered instead of being wiped.</li>
+                    <li><strong>Safer engine extraction</strong>: archives are unpacked and audited in a staging area, so a rejected archive leaves your existing installation untouched.</li>
+                </ul>
+                <p>See the <a href="https://github.com/frankea/Whisky/releases/tag/app-v3.5.2">release notes</a> for the full changelog.</p>
+            ]]></description>
+            <enclosure
+                url="https://github.com/frankea/Whisky/releases/download/app-v3.5.2/Whisky-3.5.2.dmg"
+                sparkle:edSignature="WNCu8XR9RSmYfsZT6CO+OnFo7T+ehgLNSebQWDhaFVSUhh7DcEK7fZZvWEfgvG6mspv1AEUD+2HT4MJE9wXdCw=="
+                length="9333250"
+                type="application/octet-stream" />
+        </item>
+        <item>
             <title>Whisky 3.5.1</title>
             <pubDate>Fri, 24 Jul 2026 09:06:06 +0000</pubDate>
             <sparkle:version>51</sparkle:version>
