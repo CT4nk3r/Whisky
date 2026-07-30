@@ -10,7 +10,7 @@
   > getwhisky.app.
 
   ![](https://img.shields.io/github/actions/workflow/status/frankea/Whisky/CI.yml?style=for-the-badge&label=CI)
-  [![](https://img.shields.io/codecov/c/github/frankea/Whisky?style=for-the-badge&logo=codecov&label=Coverage)](https://codecov.io/gh/frankea/Whisky)
+  [![](https://img.shields.io/codecov/c/github/frankea/Whisky?style=for-the-badge&logo=codecov&label=Coverage&flag=whiskykit)](https://codecov.io/gh/frankea/Whisky)
   [![](https://img.shields.io/github/downloads/frankea/Whisky/total?style=for-the-badge&logo=github&label=Downloads)](https://github.com/frankea/Whisky/releases)
   [![](https://img.shields.io/github/downloads/frankea/Whisky/latest/total?style=for-the-badge&label=Latest)](https://github.com/frankea/Whisky/releases/latest)
   [![](https://img.shields.io/github/issues/frankea/Whisky?style=for-the-badge)](https://github.com/frankea/Whisky/issues)
@@ -175,12 +175,13 @@ actually mean.
 
 ### Test coverage
 
-The Coverage badge above reports line coverage for **WhiskyKit only** —
-the framework that holds the bottle, Wine, GameDB, and PE-parser logic.
-The SwiftUI app target (`Whisky/`), `WhiskyCmd`, and `WhiskyThumbnail`
-aren't measured because CI runs `swift test --enable-code-coverage`
-against the WhiskyKit Swift package per
-[`.github/workflows/CI.yml`](.github/workflows/CI.yml). Read the badge as
+The Coverage badge above is scoped to the **`whiskykit` flag** — line
+coverage of the framework that holds the bottle, Wine, GameDB, and
+PE-parser logic, measured by `swift test --enable-code-coverage` per
+[`.github/workflows/CI.yml`](.github/workflows/CI.yml). The blended
+project-wide number on the [Codecov dashboard](https://codecov.io/gh/frankea/Whisky)
+reads much lower because it averages in the SwiftUI app target, which
+only receives best-effort UI-test coverage. Read the badge as
 "WhiskyKit unit-test coverage," not full-app coverage.
 
 WhiskyUITests gives behavioural coverage of the SwiftUI surface (toolbar,
