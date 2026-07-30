@@ -7,7 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.5.2] - 2026-07-30 (App)
+
+### Added
+- Bottles on disk that aren't in the library — created by an older version,
+  left behind by a reset registry, or restored from a backup of the Bottles
+  folder — are now detected at startup and offered for one-click re-import
+  (Closes #145).
+
+### Changed
+- Engine archive extraction is now staged: the archive is unpacked and its
+  symlinks audited in a temporary directory, and only content that passes
+  every safety check is moved into place. A rejected archive leaves the
+  existing installation completely untouched (Closes #147).
+
 ### Fixed
+- The backend picker no longer offers D3DMetal when the installed engine
+  doesn't include it, and bottles already configured for D3DMetal show a
+  warning explaining the WineD3D fallback instead of games failing silently
+  at launch (Closes #146).
 - The "Recommended" graphics backend now resolves to one the installed
   runtime actually provides: DXMT when the runtime bundles it, otherwise
   DXVK, and D3DMetal only when its payload is present. Previously it always
