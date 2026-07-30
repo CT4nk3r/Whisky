@@ -42,6 +42,7 @@ Whisky provides a clean and easy-to-use graphical wrapper for Wine built in nati
 ## Key Features
 
 - **Wine 11.0** - Latest stable Wine with improved compatibility and networking
+- **DXMT & DXVK Graphics** - DirectX 11 through native Metal translation (DXMT) out of the box, with DXVK over MoltenVK as the universal fallback
 - **Launcher Compatibility** - Built-in support for Steam, Epic, EA App, Rockstar, Battle.net, and more
 - **Controller Support** - SDL environment variable controls for gamepad detection and mapping issues
 - **Stability Diagnostics** - One-click diagnostic reports for troubleshooting crashes and freezes
@@ -68,7 +69,7 @@ This taps [frankea/homebrew-whisky](https://github.com/frankea/homebrew-whisky) 
 
 1. Download the latest **[Whisky-X.Y.Z.dmg](https://github.com/frankea/Whisky/releases/latest)** (signed and notarized — Gatekeeper-approved).
 2. Open the DMG and drag **Whisky.app** to **/Applications**.
-3. Launch Whisky. On first run it downloads the Wine runtime (~313 MB) and sets up your default bottle.
+3. Launch Whisky. On first run it downloads the Wine runtime (~330 MB) and sets up your default bottle.
 
 In-app updates are delivered through Sparkle from `https://frankea.github.io/Whisky/appcast.xml`.
 
@@ -86,7 +87,7 @@ The original app uses a different bundle identifier (`com.franke.Whisky` here vs
 
 ## Uninstalling
 
-Dragging **Whisky.app** to the Trash (or `brew uninstall --cask frankea/whisky/whisky`) removes the app but leaves the Wine runtime, your bottles, and app data behind — by design, so reinstalling doesn't re-download ~313 MB or lose your bottles.
+Dragging **Whisky.app** to the Trash (or `brew uninstall --cask frankea/whisky/whisky`) removes the app but leaves the Wine runtime, your bottles, and app data behind — by design, so reinstalling doesn't re-download ~330 MB or lose your bottles.
 
 > ⚠️ **Back up your bottles first if you want to keep them.** Removing the container below deletes every bottle stored in its default location. Bottles you created in a custom folder live wherever you put them — check **Bottle → Reveal in Finder** before deleting anything.
 
@@ -100,7 +101,7 @@ rm -rf "/Applications/Whisky.app"          # or: brew uninstall --cask frankea/w
 rm -rf ~/Library/Containers/com.franke.Whisky
 rm -rf ~/Library/Containers/com.franke.Whisky.WhiskyThumbnail
 
-# 3. The Wine runtime (~313 MB) and other app support
+# 3. The Wine runtime (~330 MB) and other app support
 rm -rf ~/Library/Application\ Support/com.franke.Whisky
 
 # 4. Caches, logs, preferences, and saved state
@@ -198,6 +199,7 @@ Whisky is possible thanks to the magic of several projects:
 
 - [msync](https://github.com/marzent/wine-msync) by marzent
 - [DXVK-macOS](https://github.com/Gcenx/DXVK-macOS) by Gcenx and doitsujin
+- [DXMT](https://github.com/3Shain/dxmt) by 3Shain
 - [MoltenVK](https://github.com/KhronosGroup/MoltenVK) by KhronosGroup
 - [Sparkle](https://github.com/sparkle-project/Sparkle) by sparkle-project
 - [SemanticVersion](https://github.com/SwiftPackageIndex/SemanticVersion) by SwiftPackageIndex
