@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- The sidebar's running-status check no longer writes a log file per probe:
+  at one probe per minute per visible bottle, the old path accumulated
+  ~1440 stray log files per idle bottle per day and rescanned the whole log
+  folder each time, all on the main thread. The probe now asks wineserver
+  directly, with no logging side effects (#153).
+- A failed bottle move no longer corrupts the bottle's state. Previously the
+  pin and blocklist paths were rewritten (and saved) to point at the new
+  location before the move was attempted, and the bottle stayed marked busy
+  until the app restarted; both are now rolled back when the move fails
+  (#154).
+
 ## [3.5.2] - 2026-07-30 (App)
 
 ### Added
