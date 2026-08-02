@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Bottles with Steam installed now show a games library: installed games are
+  listed with their state (running, downloading, update stalled), and Play
+  brings the client up quietly, starts the game, and applies its community
+  configuration for that launch only instead of rewriting bottle settings.
+  Per-program settings you have tuned yourself still win over the community
+  profile (#161).
+
 ### Fixed
 - The sidebar's running-status check no longer writes a log file per probe:
   at one probe per minute per visible bottle, the old path accumulated
@@ -20,9 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (#154).
 - Bottle actions no longer re-enable mid-operation: a bottle that is
   exporting, duplicating, or moving keeps its busy state even when the
-  bottle list reloads (previously any registry reload — creating a bottle,
-  re-importing an orphan — dropped the guard and let conflicting actions
-  run against files still being copied) (#155).
+  bottle list reloads (previously any registry reload, such as creating a
+  bottle or re-importing an orphan, dropped the guard and let conflicting
+  actions run against files still being copied) (#155).
 - Games installed in a Steam library are no longer mistaken for the Steam
   client: executables under `steamapps/common` stop inheriting the client's
   compatibility profile and get their own launcher detection instead (a
