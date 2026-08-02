@@ -18,6 +18,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   location before the move was attempted, and the bottle stayed marked busy
   until the app restarted; both are now rolled back when the move fails
   (#154).
+- Bottle actions no longer re-enable mid-operation: a bottle that is
+  exporting, duplicating, or moving keeps its busy state even when the
+  bottle list reloads (previously any registry reload — creating a bottle,
+  re-importing an orphan — dropped the guard and let conflicting actions
+  run against files still being copied) (#155).
+- Games installed in a Steam library are no longer mistaken for the Steam
+  client: executables under `steamapps/common` stop inheriting the client's
+  compatibility profile and get their own launcher detection instead (a
+  Rockstar title bought on Steam now detects the Rockstar launcher).
+  Launches from the program list and pins also run launcher detection now,
+  matching every other launch path (#160).
+- Two programs sharing a filename (the classic `Launch.exe` case) no longer
+  share one settings file. Settings are now keyed by the program's location
+  inside the bottle, existing settings migrate automatically, and the old
+  files are kept so downgrading loses nothing (#162).
 
 ## [3.5.2] - 2026-07-30 (App)
 
