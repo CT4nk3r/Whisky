@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Whisky — Run Windows games and apps on macOS via Wine</title>
-<meta name="description" content="Whisky is a native SwiftUI Wine wrapper for macOS with D3DMetal and DXVK graphics backends. Active community fork of the archived whisky-app/whisky. Apple Silicon, signed and notarized.">
+<meta name="description" content="Whisky is a native SwiftUI Wine wrapper for macOS with DXMT and DXVK graphics backends. Active community fork of the archived whisky-app/whisky. Apple Silicon, signed and notarized.">
 <meta name="author" content="Adam Franke">
 <meta name="theme-color" content="#1d1d1f" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#fbfbfd" media="(prefers-color-scheme: light)">
@@ -16,14 +16,14 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://frankea.github.io/Whisky/">
 <meta property="og:title" content="Whisky — Run Windows games and apps on macOS via Wine">
-<meta property="og:description" content="Native SwiftUI Wine wrapper for macOS with D3DMetal and DXVK backends. Active community fork of the archived whisky-app/whisky.">
+<meta property="og:description" content="Native SwiftUI Wine wrapper for macOS with DXMT and DXVK backends. Active community fork of the archived whisky-app/whisky.">
 <meta property="og:image" content="https://raw.githubusercontent.com/frankea/Whisky/main/images/og-card.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Whisky — Run Windows games and apps on macOS, using Wine. Apple Silicon, macOS 15+, GPL v3.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Whisky — Run Windows games and apps on macOS via Wine">
-<meta name="twitter:description" content="Native SwiftUI Wine wrapper for macOS with D3DMetal and DXVK backends. Active community fork of the archived whisky-app/whisky.">
+<meta name="twitter:description" content="Native SwiftUI Wine wrapper for macOS with DXMT and DXVK backends. Active community fork of the archived whisky-app/whisky.">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/frankea/Whisky/main/images/og-card.png">
 
 <!-- JSON-LD -->
@@ -35,7 +35,7 @@
   "operatingSystem": "macOS 15.0+",
   "applicationCategory": "GameApplication",
   "applicationSubCategory": "Wine wrapper",
-  "softwareVersion": "3.1.0",
+  "softwareVersion": "3.5.2",
   "license": "https://www.gnu.org/licenses/gpl-3.0.html",
   "downloadUrl": "https://github.com/frankea/Whisky/releases/latest",
   "url": "https://github.com/frankea/Whisky",
@@ -136,7 +136,7 @@ img.screenshot {
   <p class="tagline">Run Windows games and applications on macOS, using Wine.</p>
 </header>
 
-<p>Whisky is a native macOS app that wraps Wine with a clean SwiftUI interface. It supports Apple's D3DMetal and the DXVK Direct3D-to-Vulkan translation layer for graphics, and includes built-in compatibility for Steam, Epic, EA App, Battle.net, and other launchers.</p>
+<p>Whisky is a native macOS app that wraps Wine with a clean SwiftUI interface. It ships the DXMT (Direct3D 11 to Metal) and DXVK (Direct3D to Vulkan) graphics translation layers, and includes built-in compatibility for Steam, Epic, EA App, Battle.net, and other launchers.</p>
 
 <div class="notice">
 <strong>Active community fork.</strong> The original <a href="https://github.com/whisky-app/whisky">whisky-app/whisky</a> was archived in April 2025. This fork, maintained by <a href="https://github.com/frankea">@frankea</a>, continues development. Not affiliated with the original project or getwhisky.app.
@@ -164,7 +164,7 @@ img.screenshot {
 <h2>What's included</h2>
 <ul>
   <li>Wine 11 with macOS-specific patches</li>
-  <li>D3DMetal (Apple's Direct3D-to-Metal translation) and DXVK (Direct3D-to-Vulkan)</li>
+  <li>DXMT (Direct3D 11 to Metal) and DXVK (Direct3D to Vulkan) translation layers, selectable per bottle</li>
   <li>Launcher compatibility profiles for Steam, Epic, EA App, Battle.net, Rockstar, and more</li>
   <li>Stability diagnostics with one-click crash report export</li>
   <li>Game compatibility database with 80+ pre-configured entries</li>
@@ -172,10 +172,11 @@ img.screenshot {
 </ul>
 
 <h2>Graphics backends</h2>
-<p>Whisky translates Direct3D to the Mac GPU two ways, selectable per bottle:</p>
+<p>Whisky translates Direct3D to the Mac GPU with translation layers you pick per bottle:</p>
 <ul>
-  <li><strong>D3DMetal</strong> (default) — Apple's Direct3D-to-Metal layer from the Game Porting Toolkit. The fastest path for most modern Direct3D 11/12 titles.</li>
-  <li><strong>DXVK</strong> — Direct3D-to-Vulkan (via MoltenVK), a broad-compatibility fallback for titles D3DMetal doesn't handle. Pinned at the macOS-compatible 1.10.3 <em>by design</em>: the DXVK 2.x line needs Vulkan features macOS doesn't expose, so a higher version number wouldn't run here — a deliberate choice, not a stale dependency.</li>
+  <li><strong>DXMT</strong> (the default behind "Recommended"): Direct3D 11 to Metal, deployed per bottle so one bottle's choice never affects another. The fast path for modern DirectX 11 titles.</li>
+  <li><strong>DXVK</strong>: Direct3D to Vulkan (via MoltenVK), a broad-compatibility fallback for titles DXMT doesn't handle. Pinned at the macOS-compatible 1.10.3 <em>by design</em>: the DXVK 2.x line needs Vulkan features macOS doesn't expose, so a higher version number simply wouldn't run here.</li>
+  <li><strong>D3DMetal</strong>: Apple's layer from the Game Porting Toolkit. The current engine can't execute it, and Whisky says so in the picker instead of silently falling back to something slower. Real support (an engine that runs it, with your own imported GPTK payload) is in active development.</li>
 </ul>
 <p class="muted"><strong>Anti-cheat:</strong> games using kernel-level anti-cheat (EAC, BattlEye, and similar) generally do not run under any Wine-based wrapper on macOS, including Whisky. This is a Wine-wide limitation, not specific to this fork.</p>
 
