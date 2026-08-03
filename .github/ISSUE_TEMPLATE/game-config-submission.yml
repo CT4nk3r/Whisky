@@ -1,0 +1,102 @@
+name: 🕹️ Game Config Submission
+description: A game runs well with settings you worked out; share them so they can ship in the bundled Game Configurations.
+labels: ["game-compatibility", "gamedb"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template when you have a **working configuration** for a game and want it added to the in-app
+        Game Configurations browser, so the next person gets it with one click.
+        If the game is broken and you need help, use the **Game Compatibility Report** template instead.
+
+        **Before filing:**
+        - Check the **Game Configurations** browser inside Whisky; the game may already have an entry.
+        - If an entry exists but your settings work better, file anyway and say what should change.
+  - type: input
+    id: game-name
+    attributes:
+      label: Game name
+      placeholder: "e.g., Baldur's Gate 3"
+    validations:
+      required: true
+  - type: input
+    id: game-store
+    attributes:
+      label: Store / launcher
+      description: Where you bought / launch the game from. Include the Steam App ID if it is a Steam game.
+      placeholder: "e.g., Steam (App ID 1086940), GOG, standalone installer"
+    validations:
+      required: true
+  - type: input
+    id: exe-names
+    attributes:
+      label: Executable name(s)
+      description: The game's main .exe as it appears in the Programs list.
+      placeholder: "e.g., bg3.exe, bg3_dx11.exe"
+    validations:
+      required: true
+  - type: dropdown
+    id: rating
+    attributes:
+      label: How well does it run with your settings
+      options:
+        - "Works: runs perfectly with no issues"
+        - "Playable: runs with minor issues"
+    validations:
+      required: true
+  - type: dropdown
+    id: graphics-backend
+    attributes:
+      label: Graphics backend
+      options:
+        - "Recommended (auto)"
+        - "DXMT"
+        - "DXVK"
+        - "WineD3D"
+    validations:
+      required: true
+  - type: textarea
+    id: settings
+    attributes:
+      label: Settings that make it work
+      description: |
+        Everything you changed from defaults: Windows version, enhanced sync, DXVK async, AVX,
+        retina mode, launch arguments, environment variables, winetricks verbs, registry edits.
+        "All defaults" is a valid answer.
+    validations:
+      required: true
+  - type: textarea
+    id: known-issues
+    attributes:
+      label: Remaining issues with this config
+      description: Anything that still misbehaves (minor glitches, audio quirks, performance notes), so the entry can say so honestly.
+  - type: input
+    id: whisky-version
+    attributes:
+      label: Whisky version
+      placeholder: "e.g., 3.5.2 (About window)"
+    validations:
+      required: true
+  - type: input
+    id: macos-version
+    attributes:
+      label: macOS version
+      placeholder: "e.g., Tahoe (macOS 26)"
+    validations:
+      required: true
+  - type: input
+    id: hardware
+    attributes:
+      label: Hardware
+      placeholder: "e.g., MacBook Pro M3 Pro, 18 GB"
+    validations:
+      required: true
+  - type: checkboxes
+    id: verification
+    attributes:
+      label: Verification
+      options:
+        - label: I tested this config on a fresh bottle (not one carrying unrelated tweaks).
+          required: true
+        - label: I'm running this fork (`frankea/Whisky`, confirmed via **Whisky → About**).
+          required: true
