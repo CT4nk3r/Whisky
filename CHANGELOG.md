@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Settings gains a Game Porting Toolkit section: point it at your own
+  download of Apple's evaluation environment (the disk image or a mounted
+  volume) and the D3DMetal payload is validated and imported. Imported
+  payloads are stored safely across engine updates and deploy automatically
+  once an engine capable of running them is installed; the section states
+  plainly whether the current engine can (#164).
 - Bottles with Steam installed now show a games library: installed games are
   listed with their state (running, downloading, update stalled), and Play
   brings the client up quietly, starts the game, and applies its community
