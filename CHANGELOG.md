@@ -20,6 +20,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   configuration for that launch only instead of rewriting bottle settings.
   Per-program settings you have tuned yourself still win over the community
   profile (#161).
+- The command line tool gains `whisky games` (list a bottle's installed
+  Steam games) and `whisky launch <appid>` (launch one), both with `--json`
+  output. Launches route through the same pipeline as the app's Play
+  button, remember which bottle an App ID last launched from, and need no
+  `--bottle` flag for games installed in one place (#169).
+
+### Changed
+- Program shortcuts now launch through the live pipeline instead of baking
+  the environment in when the shortcut is created: a shortcut made today
+  picks up tomorrow's graphics, GameDB, and override changes. Existing
+  shortcuts keep working; recreate a shortcut to adopt the new behavior
+  (#169).
 
 ### Fixed
 - The sidebar's running-status check no longer writes a log file per probe:
