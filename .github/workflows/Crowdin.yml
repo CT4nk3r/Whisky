@@ -73,7 +73,7 @@ jobs:
           pull_request_title: 'New translations from Crowdin'
           pull_request_body: >-
             Automated translation sync. Crowdin is the source of truth for
-            translations — do not hand-edit non-English strings here.
+            translations; do not hand-edit non-English strings here.
           pull_request_base_branch_name: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
