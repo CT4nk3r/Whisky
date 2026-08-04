@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Interrupted runtime downloads now resume where they left off and retry
+  transient failures automatically instead of restarting the full archive
+  from zero. Partial downloads survive quitting the app, the Retry button
+  continues rather than starts over, and a completed archive left behind by
+  an interrupted setup is verified and reused. The SHA-256 integrity check
+  before install is unchanged (#174).
+
 ### Fixed
 - Output from very short-lived Wine processes is no longer occasionally
   lost: a race between the pipe reader and the termination drain could
