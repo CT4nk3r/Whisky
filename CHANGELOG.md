@@ -21,6 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (#181).
 
 ### Fixed
+- The command line tool now uses consistent exit codes: 64 with a usage
+  block only for malformed invocations, and 1 with a plain error on stderr
+  for well-formed commands that fail (no such bottle, game not found). The
+  convention is documented in `whisky --help`, and `run` and `launch` still
+  pass through the launched program's own exit code (#182).
 - Steam game routes are now forgotten when their bottle is deleted instead
   of lingering in the routing store; removing a bottle from the list while
   keeping its files preserves the routes so a re-imported bottle picks them
