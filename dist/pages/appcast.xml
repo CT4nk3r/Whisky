@@ -6,6 +6,31 @@
         <description>Whisky update feed</description>
         <language>en</language>
         <item>
+            <title>Whisky 3.6.0</title>
+            <pubDate>Mon, 04 Aug 2026 05:00:00 +0000</pubDate>
+            <sparkle:version>53</sparkle:version>
+            <sparkle:shortVersionString>3.6.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <p>Whisky now speaks your language, plays nicer with Steam, and can import Apple's Game Porting Toolkit.</p>
+                <ul>
+                    <li><strong>Fully translated in 22 languages</strong>: the entire app is now localized, from Arabic to Vietnamese. Translations are managed on Crowdin; corrections from native speakers are welcome.</li>
+                    <li><strong>Steam games library</strong>: bottles with Steam installed show your games with live state (running, downloading, update stalled). Play brings the client up quietly, starts the game, and applies its community configuration for that launch only.</li>
+                    <li><strong>Game Porting Toolkit import</strong>: point Settings at your own download of Apple's evaluation environment and the D3DMetal payload is validated, stored safely across engine updates, and deployed automatically once a capable engine is installed.</li>
+                    <li><strong>New command line tools</strong>: <code>whisky games</code> lists a bottle's installed Steam games and <code>whisky launch</code> starts one, both with JSON output.</li>
+                    <li><strong>Live shortcuts</strong>: program shortcuts now launch through the live pipeline, picking up graphics and override changes instead of baking in yesterday's settings.</li>
+                    <li><strong>Faster sidebar</strong>: the running-status probe no longer writes a log file per check, eliminating ~1440 stray log files per idle bottle per day.</li>
+                    <li><strong>Safer bottle operations</strong>: failed moves roll back cleanly, and busy bottles can no longer be mutated mid-export or mid-duplicate.</li>
+                </ul>
+                <p>See the <a href="https://github.com/frankea/Whisky/releases/tag/app-v3.6.0">release notes</a> for the full changelog.</p>
+            ]]></description>
+            <enclosure
+                url="https://github.com/frankea/Whisky/releases/download/app-v3.6.0/Whisky-3.6.0.dmg"
+                sparkle:edSignature="lZMKgbC7etZC9B3yfd7ao4n3gB/NdkzlFoMOSr3Cxy7EjnTUnKgO92R2II/+bb89/nt8juCp+lq5bHH7xCsKBA=="
+                length="10097105"
+                type="application/octet-stream" />
+        </item>
+        <item>
             <title>Whisky 3.5.2</title>
             <pubDate>Wed, 30 Jul 2026 16:35:00 +0000</pubDate>
             <sparkle:version>52</sparkle:version>
