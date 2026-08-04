@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Output from very short-lived Wine processes is no longer occasionally
+  lost: a race between the pipe reader and the termination drain could
+  finish the process stream before the final chunk was delivered, dropping
+  it from logs and the in-app output view. This was also the cause of the
+  long-standing intermittent CI failure in the process stream tests.
+
 ## [3.6.0] - 2026-08-04 (App)
 
 ### Added

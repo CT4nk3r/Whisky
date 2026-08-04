@@ -111,6 +111,13 @@ public extension Process {
         fileHandle: FileHandle?
     ) -> @Sendable (FileHandle) -> Void {
         { pipeHandle in
+            // The read itself must happen under the lock: if bytes were consumed
+            // here first and emitted only after the lock, the termination handler
+            // could drain an empty pipe, finish the stream, and the pending yield
+            // would land on a finished continuation, losing the final output of a
+            // fast-exiting process.
+            outputLock.lock()
+            defer { outputLock.unlock() }
             switch pipeHandle.nextOutput() {
             case .endOfFile:
                 // The pipe's write end closed while this handler is still installed
@@ -122,12 +129,10 @@ public extension Process {
             case .pending:
                 // A non-empty chunk that isn't valid UTF-8 on its own (e.g. a multi-byte
                 // sequence split across reads). Its bytes are already consumed, so this is not
-                // a recovery — we just don't treat the stream as EOF, and leave the handler
+                // a recovery, we just don't treat the stream as EOF, and leave the handler
                 // installed for the remaining output.
                 return
             case let .text(line):
-                outputLock.lock()
-                defer { outputLock.unlock() }
                 self.emit(line: line, kind: kind, continuation: continuation, fileHandle: fileHandle)
             }
         }
