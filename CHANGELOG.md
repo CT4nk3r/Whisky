@@ -14,8 +14,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   continues rather than starts over, and a completed archive left behind by
   an interrupted setup is verified and reused. The SHA-256 integrity check
   before install is unchanged (#174).
+- Pressing Play on a Steam game no longer creates settings files for every
+  executable near the game's install folder: only the program that actually
+  launches is materialized, so Play is snappier for games that ship many
+  helper executables and bottles stop accumulating unused settings plists
+  (#181).
 
 ### Fixed
+- Steam game routes are now forgotten when their bottle is deleted instead
+  of lingering in the routing store; removing a bottle from the list while
+  keeping its files preserves the routes so a re-imported bottle picks them
+  back up (#180).
 - Output from very short-lived Wine processes is no longer occasionally
   lost: a race between the pipe reader and the termination drain could
   finish the process stream before the final chunk was delivered, dropping
