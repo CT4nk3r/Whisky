@@ -172,12 +172,12 @@ final class WhiskyUITests: XCTestCase {
         openBottleConfiguration()
         // Wine section is the first one expanded by default
         XCTAssertTrue(app.staticTexts["Wine"].exists)
-        // Other section headers should be reachable as collapsible groups (collapsed by default)
-        XCTAssertTrue(
-            app.staticTexts["Launcher Compatibility"].exists ||
-                app.staticTexts["Controller & Input"].exists,
-            "Expected at least one collapsible config section header"
-        )
+        // Other section headers render as DisclosureTriangles, not StaticTexts
+        // (see testControllerAndInputSectionExists), so query them the same way.
+        let sectionHeader = app.descendants(matching: .disclosureTriangle)
+            .matching(NSPredicate(format: "label CONTAINS 'Launcher Compatibility' OR label CONTAINS 'Controller'"))
+            .firstMatch
+        XCTAssertTrue(sectionHeader.waitForExistence(timeout: 5), "Expected a collapsible config section header")
     }
 
     /// Verifies the Controller & Input section exists as a collapsed DisclosureGroup
