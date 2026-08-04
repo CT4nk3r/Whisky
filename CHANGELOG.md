@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.6.0] - 2026-08-04 (App)
+
 ### Added
 - Settings gains a Game Porting Toolkit section: point it at your own
   download of Apple's evaluation environment (the disk image or a mounted
