@@ -25,6 +25,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   output. Launches route through the same pipeline as the app's Play
   button, remember which bottle an App ID last launched from, and need no
   `--bottle` flag for games installed in one place (#169).
+- Whisky is now fully translated in all 22 supported languages: Arabic,
+  Chinese (Simplified and Traditional), Czech, Danish, Dutch, Finnish,
+  French, German, Italian, Japanese, Korean, Polish, Portuguese (Brazil
+  and Portugal), Romanian, Russian, Spanish, Swedish, Turkish, Ukrainian,
+  and Vietnamese. Translations are managed on Crowdin, where corrections
+  and improvements from native speakers are welcome (#177).
 
 ### Changed
 - Program shortcuts now launch through the live pipeline instead of baking
