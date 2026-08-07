@@ -21,6 +21,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (#181).
 
 ### Fixed
+- A bottle no longer shows up twice in the bottle list and `whisky list`
+  when the registry holds the same path in two URL forms (with and without
+  a trailing slash). The registry now compares canonical paths everywhere
+  entries are added, and a registry already carrying duplicates is healed
+  on first load (#183).
+- `whisky run` now passes options it doesn't recognize through to the
+  program, so `whisky run MyBottle app.exe --disable-gpu` works without a
+  bare `--` separator. A program option that shares a name with one of
+  run's own options still goes after `--`, which the help text now
+  explains (#183).
 - The command line tool now uses consistent exit codes: 64 with a usage
   block only for malformed invocations, and 1 with a plain error on stderr
   for well-formed commands that fail (no such bottle, game not found). The
