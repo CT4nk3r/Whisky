@@ -19,8 +19,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   launches is materialized, so Play is snappier for games that ship many
   helper executables and bottles stop accumulating unused settings plists
   (#181).
+- Waiting for a cold Steam client no longer spawns a Wine tasklist process
+  every two seconds: a host-side process check answers the common
+  nothing-running-yet case, so cold starts stop competing with the client
+  they are waiting for (#189).
 
 ### Fixed
+- The DLL Overrides section now lists the managed overrides of the graphics
+  backend actually in effect: a DXMT bottle shows the four entries it applies
+  at launch instead of none, and a stale legacy DXVK flag no longer credits a
+  D3DMetal bottle with overrides that are never applied (#186).
+- Program override settings now resolve Recommended before reporting: the
+  DXVK sub-controls appear for a program that resolves to DXVK, and the
+  inherited summary names the backend that actually runs instead of reading
+  "Recommended" (#187).
 - A bottle no longer shows up twice in the bottle list and `whisky list`
   when the registry holds the same path in two URL forms (with and without
   a trailing slash). The registry now compares canonical paths everywhere
