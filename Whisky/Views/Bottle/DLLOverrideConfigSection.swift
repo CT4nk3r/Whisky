@@ -37,18 +37,18 @@ struct DLLOverrideConfigSection: View {
         }
     }
 
-    /// Computes managed overrides from bottle state (DXVK toggle, launcher presets).
+    /// Computes managed overrides from bottle state (graphics backend, launcher presets).
     private var computedManagedOverrides: [(entry: DLLOverrideEntry, source: String)] {
         var managed: [(entry: DLLOverrideEntry, source: String)] = []
 
-        // DXVK managed entries
-        if bottle.settings.dxvk {
-            for entry in DLLOverrideResolver.dxvkPreset {
-                managed.append((
-                    entry: entry,
-                    source: String(localized: "config.dllOverrides.source.dxvk")
-                ))
-            }
+        // The backend, not the legacy `dxvk` flag: the launch path only honours
+        // that flag when no backend is set, so reading it here listed
+        // overrides that were not the ones being applied.
+        let backend = bottle.settings.graphicsBackend == .recommended
+            ? GraphicsBackendResolver.resolve()
+            : bottle.settings.graphicsBackend
+        for entry in DLLOverrideResolver.managedPreset(for: backend) {
+            managed.append((entry: entry, source: backend.displayName))
         }
 
         // Launcher managed entries (when launcher requires DXVK and autoEnableDXVK is on)

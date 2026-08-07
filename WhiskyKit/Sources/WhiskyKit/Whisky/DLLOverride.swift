@@ -173,6 +173,22 @@ public struct DLLOverrideResolver: Sendable {
         ]
     }
 
+    /// The DLL overrides a graphics backend contributes at bottle level.
+    ///
+    /// D3DMetal and WineD3D contribute none: both run on Wine's builtin D3D and
+    /// pick between themselves with `WINED3DMETAL`. Resolve `.recommended`
+    /// before calling, or a bottle gets credited with the wrong set.
+    public static func managedPreset(for backend: GraphicsBackend) -> [DLLOverrideEntry] {
+        switch backend {
+        case .dxvk:
+            dxvkPreset
+        case .dxmt:
+            dxmtPreset
+        case .d3dMetal, .wined3d, .recommended:
+            []
+        }
+    }
+
     // swiftlint:disable cyclomatic_complexity
 
     /// Resolves all override sources into a `WINEDLLOVERRIDES` string and warnings.
