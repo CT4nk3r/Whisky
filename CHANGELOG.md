@@ -28,7 +28,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   nothing-running-yet case, so cold starts stop competing with the client
   they are waiting for (#189).
 
+### Added
+- Creating a bottle on an external or network volume now checks the location
+  up front, while the creation sheet is still open: if macOS is withholding
+  Files and Folders access, the sheet says so and offers a direct route to
+  the privacy settings instead of failing later with a cryptic prefix error.
+  The default location is checked on submit too, and creation stays disabled
+  until the location is usable (#190, #191).
+
 ### Fixed
+- Bottles on non-APFS removable drives are no longer refused as "full" when
+  the drive has plenty of space: the capacity check now falls back to the
+  standard figure on external volumes, where the purgeable-space service
+  behind the preferred figure has no backing and reports zero (#192).
 - DLL overrides now reach Wine through the prefix registry instead of the
   WINEDLLOVERRIDES environment variable: the bottle's set goes to the prefix
   default and the launched program's resolved set to its own AppDefaults
