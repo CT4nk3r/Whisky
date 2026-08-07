@@ -239,7 +239,8 @@ public class Wine {
     public static func runProgram(
         at url: URL, args: [String] = [], bottle: Bottle, environment: [String: String] = [:],
         programOverrides: ProgramOverrides? = nil, programSettings: ProgramSettings? = nil,
-        gameProfileEnvironment: [String: String] = [:]
+        gameProfileEnvironment: [String: String] = [:],
+        overridesApplyToDescendants: Bool = false
     ) async throws -> ProgramRunResult {
         // Note: Launcher detection and fix application happen before this method
         // is called, via LauncherFixes.detectAndApply from the app's run paths
@@ -295,9 +296,15 @@ public class Wine {
         fileHandle.writeApplicationInfo()
         fileHandle.writeInfo(for: bottle)
 
-        let wineEnvironment = constructWineEnvironment(
+        var wineEnvironment = constructWineEnvironment(
             for: bottle, environment: environment, programOverrides: programOverrides,
             programSettings: programSettings, gameProfileEnvironment: gameProfileEnvironment
+        )
+
+        try await applyDLLOverrides(
+            for: url, bottle: bottle,
+            wineEnvironment: &wineEnvironment,
+            applyToDescendants: overridesApplyToDescendants
         )
 
         // Create a run log entry to track this session

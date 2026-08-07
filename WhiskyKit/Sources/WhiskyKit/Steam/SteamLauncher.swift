@@ -78,7 +78,9 @@ public enum SteamLauncher {
             _ = try? await Wine.runProgram(
                 at: steamExe, args: ["-applaunch", String(appId)], bottle: bottle,
                 programOverrides: plan.overrides,
-                gameProfileEnvironment: plan.gameProfileEnvironment
+                gameProfileEnvironment: plan.gameProfileEnvironment,
+                // the plan is the game's; steam.exe is only the vehicle
+                overridesApplyToDescendants: true
             )
         }
     }

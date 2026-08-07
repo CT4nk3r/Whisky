@@ -266,6 +266,26 @@ public enum LauncherType: String, Codable, CaseIterable, Sendable, Identifiable 
         }
     }
 
+    /// Executables this launcher spawns that must share its DLL overrides.
+    ///
+    /// `AppDefaults` is per executable with no inheritance, and Steam draws its
+    /// client in `steamwebhelper.exe`, so an override on `steam.exe` alone
+    /// leaves the window blank. Games a launcher starts are deliberately absent.
+    public var helperExecutables: [String] {
+        switch self {
+        case .steam:
+            ["steamwebhelper.exe", "steamservice.exe"]
+        case .epicGames:
+            ["EpicWebHelper.exe"]
+        case .eaApp:
+            ["EABackgroundService.exe"]
+        case .battleNet:
+            ["Battle.net Helper.exe"]
+        case .rockstar, .ubisoft, .paradox:
+            []
+        }
+    }
+
     /// The recommended locale for this launcher.
     ///
     /// Most launchers work best with US English locale to avoid
