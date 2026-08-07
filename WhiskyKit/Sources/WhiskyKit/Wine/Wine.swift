@@ -250,10 +250,22 @@ public class Wine {
         // over the bottle setting, and `.recommended` resolves to its concrete
         // backend. This decides which translation layer's files are deployed;
         // the matching WINEDLLOVERRIDES come from the environment layers.
+        // `.recommended` resolves against what is being launched, not just the
+        // machine.
         let effectiveBackendChoice = programOverrides?.graphicsBackend ?? bottle.settings.graphicsBackend
         let effectiveBackend = effectiveBackendChoice == .recommended
-            ? GraphicsBackendResolver.resolve()
+            ? GraphicsBackendResolver.resolve(for: LauncherType.detect(from: url))
             : effectiveBackendChoice
+
+        // The bottle composes its overrides from its own resolution, which does
+        // not know what is being launched, so pin the decision here or a
+        // steered launcher gets DXVK's files and none of its overrides.
+        var programOverrides = programOverrides
+        if effectiveBackendChoice == .recommended, effectiveBackend != GraphicsBackendResolver.resolve() {
+            var pinned = programOverrides ?? ProgramOverrides()
+            pinned.graphicsBackend = effectiveBackend
+            programOverrides = pinned
+        }
 
         // DXMT first: if launcher auto-DXVK also fires below (e.g. Rockstar),
         // DXVK's file copy deterministically wins, matching the override-layer
