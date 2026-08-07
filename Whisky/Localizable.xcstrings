@@ -20850,6 +20850,16 @@
         }
       }
     },
+    "bottle.creation.preflight.accessDenied" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS is withholding access to %@. Grant Whisky access under System Settings > Privacy & Security > Files and Folders, then try again."
+          }
+        }
+      }
+    },
     "bottle.creation.preflight.insufficientSpace" : {
       "localizations" : {
         "ar" : {
@@ -42059,6 +42069,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "建立"
+          }
+        }
+      }
+    },
+    "create.location.checkAgain" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check Again"
+          }
+        }
+      }
+    },
+    "create.location.openPrivacySettings" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Privacy Settings…"
+          }
+        }
+      }
+    },
+    "create.location.problem" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This location can't be used"
           }
         }
       }
