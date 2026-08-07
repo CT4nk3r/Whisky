@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- With D3DMetal installed, the Recommended graphics backend now resolves
+  launchers to DXVK, since their Chromium-based clients cannot render on
+  D3DMetal, while the games they start still resolve to D3DMetal. Bottles
+  without D3DMetal installed behave exactly as before (#188).
 - Interrupted runtime downloads now resume where they left off and retry
   transient failures automatically instead of restarting the full archive
   from zero. Partial downloads survive quitting the app, the Retry button
@@ -25,6 +29,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   they are waiting for (#189).
 
 ### Fixed
+- DLL overrides now reach Wine through the prefix registry instead of the
+  WINEDLLOVERRIDES environment variable: the bottle's set goes to the prefix
+  default and the launched program's resolved set to its own AppDefaults
+  entry (helper processes like steamwebhelper.exe included). A launcher's
+  graphics backend no longer silently becomes every game's backend, and
+  per-program backend overrides now take effect instead of being masked by
+  the inherited variable (#184, #185).
 - The DLL Overrides section now lists the managed overrides of the graphics
   backend actually in effect: a DXMT bottle shows the four entries it applies
   at launch instead of none, and a stale legacy DXVK flag no longer credits a
