@@ -274,9 +274,9 @@ struct ProgramOverrideSettingsView: View {
                     }
                 }
 
-                // DXVK sub-controls only when backend is DXVK
-                let overriddenBackend = program.settings.overrides?.graphicsBackend ?? .recommended
-                if overriddenBackend == .dxvk {
+                // Resolved, so a program on Recommended that runs DXVK does
+                // not hide the controls that are in effect.
+                if resolvedOverriddenBackend == .dxvk {
                     graphicsControls
                 }
 
@@ -286,7 +286,8 @@ struct ProgramOverrideSettingsView: View {
                     .foregroundStyle(.secondary)
             } else {
                 inheritedSummary(
-                    "\(bottle.settings.graphicsBackend.displayName), "
+                    // Resolved, or a bottle on Recommended reports "Recommended".
+                    "\(resolvedBottleBackend.displayName), "
                         + "DXVK Async \(bottle.settings.dxvkAsync ? "On" : "Off"), "
                         + "HUD \(hudDescription(bottle.settings.dxvkHud))"
                 )
@@ -548,6 +549,19 @@ struct ProgramOverrideSettingsView: View {
         program.settings.overrides?.graphicsBackend != nil
     }
 
+    /// The backend this program actually launches with.
+    private var resolvedOverriddenBackend: GraphicsBackend {
+        let backend = program.settings.overrides?.graphicsBackend ?? .recommended
+        return backend == .recommended ? GraphicsBackendResolver.resolve() : backend
+    }
+
+    /// The bottle's backend, resolved, for the inherited summary.
+    private var resolvedBottleBackend: GraphicsBackend {
+        bottle.settings.graphicsBackend == .recommended
+            ? GraphicsBackendResolver.resolve()
+            : bottle.settings.graphicsBackend
+    }
+
     private var hasSyncOverride: Bool {
         program.settings.overrides?.enhancedSync != nil
     }
@@ -608,7 +622,8 @@ struct ProgramOverrideSettingsView: View {
                 ensureOverrides()
                 if isOn {
                     program.settings.overrides?.graphicsBackend = bottle.settings.graphicsBackend
-                    program.settings.overrides?.dxvk = bottle.settings.dxvk
+                    // `dxvk` is not seeded: the launch path ignores it whenever
+                    // a backend override is set, and one is set right here.
                     program.settings.overrides?.dxvkAsync = bottle.settings.dxvkAsync
                     program.settings.overrides?.dxvkHud = bottle.settings.dxvkHud
                 } else {
@@ -716,13 +731,6 @@ struct ProgramOverrideSettingsView: View {
         Binding(
             get: { program.settings.overrides?.graphicsBackend ?? bottle.settings.graphicsBackend },
             set: { program.settings.overrides?.graphicsBackend = $0 }
-        )
-    }
-
-    private var dxvkBinding: Binding<Bool> {
-        Binding(
-            get: { program.settings.overrides?.dxvk ?? bottle.settings.dxvk },
-            set: { program.settings.overrides?.dxvk = $0 }
         )
     }
 
