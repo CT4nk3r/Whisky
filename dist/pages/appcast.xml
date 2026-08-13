@@ -6,6 +6,29 @@
         <description>Whisky update feed</description>
         <language>en</language>
         <item>
+            <title>Whisky 3.6.1</title>
+            <pubDate>Thu, 13 Aug 2026 17:30:00 +0000</pubDate>
+            <sparkle:version>54</sparkle:version>
+            <sparkle:shortVersionString>3.6.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <p>Whisky 3.6.1 fixes graphics backend routing, external-drive bottles, and doubled library entries, and makes runtime downloads resumable.</p>
+                <ul>
+                    <li><strong>Backends stay where you set them</strong>: DLL overrides go through the prefix registry, so a launcher's graphics backend no longer becomes every game's backend and per-program overrides actually apply.</li>
+                    <li><strong>Doubled entries heal themselves</strong>: a bottle registered under two path forms showed every game twice; the registry now dedupes and repairs itself on first launch.</li>
+                    <li><strong>External drives work</strong>: non-APFS drives are no longer refused as "full", and bottle creation asks for disk access up front instead of failing with a cryptic prefix error.</li>
+                    <li><strong>Resumable downloads</strong>: interrupted runtime downloads continue where they left off and retry transient failures.</li>
+                    <li><strong>Smarter defaults with D3DMetal</strong>: Recommended sends Chromium-based launchers to DXVK while their games still get D3DMetal.</li>
+                </ul>
+                <p>See the <a href="https://github.com/frankea/Whisky/releases/tag/app-v3.6.1">release notes</a> for the full changelog.</p>
+            ]]></description>
+            <enclosure
+                url="https://github.com/frankea/Whisky/releases/download/app-v3.6.1/Whisky-3.6.1.dmg"
+                sparkle:edSignature="fp6SF8/VSwU6h4d6XMz/80O1xVHIgy5cryRbGsRmvIxf5RLXVWGa0bi//QX/LnZC5IYMa6QEJ0gXF3DZF+dBBw=="
+                length="10206943"
+                type="application/octet-stream" />
+        </item>
+        <item>
             <title>Whisky 3.6.0</title>
             <pubDate>Mon, 04 Aug 2026 05:00:00 +0000</pubDate>
             <sparkle:version>53</sparkle:version>
