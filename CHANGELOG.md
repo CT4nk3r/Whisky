@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.6.1] - 2026-08-13 (App)
+
 ### Changed
 - With D3DMetal installed, the Recommended graphics backend now resolves
   launchers to DXVK, since their Chromium-based clients cannot render on
