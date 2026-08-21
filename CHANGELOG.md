@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- British English localization, generated from the English strings and kept
+  complete by a CI check, so systems set to English (UK) see proper spellings
+  instead of raw localization keys (#208).
+
 ### Changed
 - The bottle action bar now emphasizes Run as its primary control, with
   Liquid Glass styling on macOS 26 and bordered buttons on earlier
