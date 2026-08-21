@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- The bottle action bar now emphasizes Run as its primary control, with
+  Liquid Glass styling on macOS 26 and bordered buttons on earlier
+  releases (#210).
 - The Sequoia Compatibility Mode toggle has been removed. The fixes it
   claimed to control ship unconditionally, so the switch changed nothing in
   either position (#216).
