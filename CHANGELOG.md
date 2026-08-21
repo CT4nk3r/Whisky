@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Whisky now opens onto a library of your games and pinned programs instead
+  of a sidebar of bottles. Steam games show their own store artwork from the
+  client's cache, other programs get a backdrop derived from their icon, and
+  cards show running state and last-played times. Bottles are one click away
+  under their own heading (#206).
 - MetalFX upscaling via the DLSS bridge, on by default for D3DMetal bottles.
   The bridge DLL Apple ships was never deployed, so the MetalFX switch had
   nothing to act on (#204). Apple's NVAPI is deployed alongside it so games
@@ -19,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   instead of raw localization keys (#208).
 
 ### Changed
+- The per-bottle Steam library screen has been removed; the library on the
+  landing screen does that job for every bottle at once (#206).
 - The bottle action bar now emphasizes Run as its primary control, with
   Liquid Glass styling on macOS 26 and bordered buttons on earlier
   releases (#210).
