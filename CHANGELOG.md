@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- MetalFX upscaling via the DLSS bridge, on by default for D3DMetal bottles.
+  The bridge DLL Apple ships was never deployed, so the MetalFX switch had
+  nothing to act on. Games that call the DLSS API directly can now reach
+  MetalFX; titles using NVIDIA Streamline additionally need the NVAPI
+  deployment, which is in progress (#204, part of #198).
 - British English localization, generated from the English strings and kept
   complete by a CI check, so systems set to English (UK) see proper spellings
   instead of raw localization keys (#208).
