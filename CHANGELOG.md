@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- The Sequoia Compatibility Mode toggle has been removed. The fixes it
+  claimed to control ship unconditionally, so the switch changed nothing in
+  either position (#216).
+
 ### Fixed
+- The shader cache toggle now controls the cache DXVK actually reads, and a
+  dxvk.conf file placed in the bottle root is picked up at launch. The
+  Recommended backend applies the same availability check as the backend
+  picker, so it can no longer select a backend whose payload is missing and
+  then fail at launch (#216).
 - The audio driver and latency settings now actually take effect: they are
   written to the bottle's Wine registry at launch, which nothing did before,
   so the options were recorded but never applied (#214).
