@@ -1075,7 +1075,7 @@ public extension Wine {
     ///   - classifier: Optional pre-configured classifier. If `nil`, creates one
     ///     with default patterns.
     /// - Returns: A ``CrashDiagnosis`` if the log was readable, or `nil` on failure.
-    public static func classifyLastRun(
+    static func classifyLastRun(
         logFileURL: URL,
         exitCode: Int32,
         classifier: CrashClassifier? = nil
