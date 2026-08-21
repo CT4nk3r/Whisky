@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   either position (#216).
 
 ### Fixed
+- Troubleshooting fixes now do what their cards say: the crash banner's
+  buttons open the diagnosis they promise, remediation cards actually apply
+  (winetricks installs run and report their real outcome, and a fix that
+  cannot be performed is recorded as failed rather than applied), and the
+  troubleshooting wizard is localized (#213).
 - The shader cache toggle now controls the cache DXVK actually reads, and a
   dxvk.conf file placed in the bottle root is picked up at launch. The
   Recommended backend applies the same availability check as the backend
