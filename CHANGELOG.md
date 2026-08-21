@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- A D3DMetal bottle answers when a game asks whether hardware accelerated GPU
+  scheduling is available. Wine only answers that query for a caller that says
+  it is running on D3DMetal, and nothing said so, so the answer was always that
+  the feature is not implemented.
 - DirectX 12 games run again in a bottle set to DXVK or DXMT. Neither ships a
   d3d12 of its own and neither said so, so that one DLL quietly fell through to
   D3DMetal while the rest of the stack was not. A DX12 game took its adapter
