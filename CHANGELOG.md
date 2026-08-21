@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   either position (#216).
 
 ### Fixed
+- The Play Test Tone button now actually plays a tone. The test executable
+  was never included in any build, so the button silently did nothing and
+  then asked whether you heard it. The tone is also gentler: 600ms with
+  fades instead of a 100ms full-scale click (#209).
 - Audio settings, the console, and program overrides no longer show raw
   localization keys in place of text on English systems: the English source
   strings were missing from the catalog and have been restored (#207).
