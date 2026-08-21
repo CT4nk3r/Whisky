@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   either position (#216).
 
 ### Fixed
+- Audio settings, the console, and program overrides no longer show raw
+  localization keys in place of text on English systems: the English source
+  strings were missing from the catalog and have been restored (#207).
 - Troubleshooting fixes now do what their cards say: the crash banner's
   buttons open the diagnosis they promise, remediation cards actually apply
   (winetricks installs run and report their real outcome, and a fix that
