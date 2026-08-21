@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   client's cache, other programs get a backdrop derived from their icon, and
   cards show running state and last-played times. Bottles are one click away
   under their own heading (#206).
+- D3DMetal now uses its Metal 4 command encoding backend by default, with a
+  toggle beside MetalFX for titles it does not suit. The engine ignores the
+  setting on macOS versions without Metal 4 and on Direct3D 11 titles, so it
+  is inert where it cannot help (#205).
 - MetalFX upscaling via the DLSS bridge, on by default for D3DMetal bottles.
   The bridge DLL Apple ships was never deployed, so the MetalFX switch had
   nothing to act on (#204). Apple's NVAPI is deployed alongside it so games
