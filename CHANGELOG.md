@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- The audio driver and latency settings now actually take effect: they are
+  written to the bottle's Wine registry at launch, which nothing did before,
+  so the options were recorded but never applied (#214).
 - Crash diagnosis now covers games that die later in a session, not just at
   launch: classification runs when the bottle's Wine session actually ends,
   and it reads the start of the log as well as the end, which is where
