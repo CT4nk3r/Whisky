@@ -13796,12 +13796,6 @@
             "value" : "Detaljer"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Details"
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13848,12 +13842,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "세부사항"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Details"
           }
         },
         "pl" : {
@@ -15122,18 +15110,6 @@
             "value" : "Funguje"
           }
         },
-        "da" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15182,12 +15158,6 @@
             "value" : "정상"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
-          }
-        },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15216,12 +15186,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Работает"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
           }
         },
         "tr" : {
@@ -29729,12 +29693,6 @@
             "value" : "지연 시간"
           }
         },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Latency"
-          }
-        },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
@@ -40496,12 +40454,6 @@
             "value" : "Lyd"
           }
         },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Audio"
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
@@ -40548,12 +40500,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "오디오"
-          }
-        },
-        "nl" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Audio"
           }
         },
         "pl" : {
