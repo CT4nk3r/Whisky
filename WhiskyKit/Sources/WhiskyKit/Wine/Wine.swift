@@ -267,6 +267,13 @@ public class Wine {
             programOverrides = pinned
         }
 
+        // Wine 11 exposes Unity 6's pointer APIs as stubs. If the game's own
+        // Player.log proves it hit that path, install the scoped proxy and add
+        // the matching native-first override for this launch.
+        if await UnityPointerShim.prepare(for: url, in: bottle) {
+            programOverrides = UnityPointerShim.addingVersionOverride(to: programOverrides)
+        }
+
         try prepareBackendPrefix(effectiveBackend, bottle: bottle)
 
         // Enable DXVK if needed: effective backend, the legacy program-level

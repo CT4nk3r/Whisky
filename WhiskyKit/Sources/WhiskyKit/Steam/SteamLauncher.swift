@@ -76,9 +76,13 @@ public enum SteamLauncher {
 
         return Task {
             await Wine.syncAudioRegistry(bottle: bottle)
+            var overrides = plan.overrides
+            if let installURL, await UnityPointerShim.prepare(in: installURL, bottle: bottle) {
+                overrides = UnityPointerShim.addingVersionOverride(to: overrides)
+            }
             _ = try? await Wine.runProgram(
                 at: steamExe, args: ["-applaunch", String(appId)], bottle: bottle,
-                programOverrides: plan.overrides,
+                programOverrides: overrides,
                 gameProfileEnvironment: plan.gameProfileEnvironment,
                 // the plan is the game's; steam.exe is only the vehicle
                 overridesApplyToDescendants: true

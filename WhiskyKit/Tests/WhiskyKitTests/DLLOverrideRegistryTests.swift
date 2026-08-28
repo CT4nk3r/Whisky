@@ -36,6 +36,48 @@ final class DLLOverrideRegistryTests: XCTestCase {
         )
     }
 
+    /// Unity 6 titles that ship a version.dll pointer shim need this exact
+    /// per-executable entry. Keeping it out of `WINEDLLOVERRIDES` ensures the
+    /// native preference does not leak from the game into any child process.
+    func testUnityPointerShimRendersANativeThenBuiltinProgramOverride() {
+        let scope = Wine.DLLOverrideScope.program("How to Fish.exe")
+        let document = Wine.registryDocument(for: [
+            (key: scope.registryKey, overrides: ["version": "native,builtin"])
+        ])
+
+        XCTAssertTrue(document.contains(
+            #"[HKCU\Software\Wine\AppDefaults\How to Fish.exe\DllOverrides]"#
+        ))
+        XCTAssertTrue(document.contains(#""version"="native,builtin""#))
+        XCTAssertFalse(document.contains("WINEDLLOVERRIDES"))
+    }
+
+    func testUnityPointerShimOverrideReplacesAnExistingVersionSetting() {
+        var inherited = ProgramOverrides()
+        inherited.dllOverrides = [
+            DLLOverrideEntry(dllName: "version", mode: .builtin),
+            DLLOverrideEntry(dllName: "xaudio2_7", mode: .native)
+        ]
+
+        let fixed = UnityPointerShim.addingVersionOverride(to: inherited)
+
+        XCTAssertEqual(
+            fixed.dllOverrides?.filter { $0.dllName == "version" },
+            [DLLOverrideEntry(dllName: "version", mode: .nativeThenBuiltin)]
+        )
+        XCTAssertTrue(fixed.dllOverrides?.contains(DLLOverrideEntry(dllName: "xaudio2_7", mode: .native)) == true)
+    }
+
+    func testUnityPointerShimRecognizesItsInstalledProxy() throws {
+        let folder = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+
+        try Data("prefix WINE_PTRSHIM_MARKER_V1 suffix".utf8).write(to: folder.appending(path: "version.dll"))
+
+        XCTAssertTrue(UnityPointerShim.hasInstalledShim(in: folder))
+    }
+
     /// Two executables must land in different keys, which is the whole point:
     /// an environment variable could not separate a launcher from the games it
     /// spawns.
