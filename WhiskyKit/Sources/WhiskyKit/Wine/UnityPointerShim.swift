@@ -26,13 +26,15 @@ import os.log
 /// The proxy is deliberately not bundled: it comes from a pinned upstream revision
 /// and its SHA-256 is verified before it is copied next to a game executable.
 enum UnityPointerShim {
-    private static let log = Logger(subsystem: Bundle.whiskyBundleIdentifier, category: "unity-pointer-shim")
+    private static let log = Logger(
+        subsystem: Bundle.whiskyBundleIdentifier, category: "unity-pointer-shim"
+    )
     private static let fingerprint = "EnableMouseInPointer failed"
     private static let marker = "WINE_PTRSHIM_MARKER_V1"
     private static let shimURL = URL(string:
         "https://raw.githubusercontent.com/feiyuehchen/Meccha-Chameleon-For-MAC/"
             + "2bf0c1779f0982280d04774e9ea675e7f33df783/ptrshim/version.dll"
-    )!
+    ) ?? URL(fileURLWithPath: "/")
     private static let shimSHA256 = "7b4b719501eb99bb907711776021bbbdc7e7003ca732bbad10a5840bde17e878"
 
     /// Installs the shim beside `executable` when the Unity title was previously
@@ -62,7 +64,10 @@ enum UnityPointerShim {
                 log.error("Unity pointer shim download returned an unexpected response")
                 return false
             }
-            guard SHA256.hash(data: data).compactMap({ String(format: "%02x", $0) }).joined() == shimSHA256 else {
+            let checksum = SHA256.hash(data: data)
+                .compactMap { String(format: "%02x", $0) }
+                .joined()
+            guard checksum == shimSHA256 else {
                 log.error("Unity pointer shim checksum mismatch")
                 return false
             }
@@ -76,7 +81,9 @@ enum UnityPointerShim {
 
     static func gameDirectory(for executable: URL) -> URL? {
         let directory = executable.deletingLastPathComponent()
-        return FileManager.default.fileExists(atPath: directory.appending(path: "UnityPlayer.dll").path) ? directory : nil
+        return FileManager.default.fileExists(atPath: directory.appending(path: "UnityPlayer.dll").path)
+            ? directory
+            : nil
     }
 
     static func needsShim(in gameDirectory: URL, bottle: Bottle) -> Bool {
@@ -94,16 +101,18 @@ enum UnityPointerShim {
     }
 
     static func playerLogURL(in gameDirectory: URL, bottle: Bottle) -> URL? {
-        guard let dataDirectory = try? FileManager.default.contentsOfDirectory(
+        let contents = try? FileManager.default.contentsOfDirectory(
             at: gameDirectory, includingPropertiesForKeys: nil
-        ).first(where: { $0.lastPathComponent.hasSuffix("_Data") }),
-        let info = try? String(contentsOf: dataDirectory.appending(path: "app.info"), encoding: .utf8)
+        )
+        guard let dataDirectory = contents?.first(where: { $0.lastPathComponent.hasSuffix("_Data") }),
+              let info = try? String(contentsOf: dataDirectory.appending(path: "app.info"), encoding: .utf8)
         else { return nil }
         let names = info.split(whereSeparator: \.isNewline).map(String.init)
         guard names.count >= 2, !names[0].isEmpty, !names[1].isEmpty else { return nil }
 
         let users = bottle.url.appending(path: "drive_c/users")
-        guard let homes = try? FileManager.default.contentsOfDirectory(at: users, includingPropertiesForKeys: nil) else {
+        guard let homes = try? FileManager.default.contentsOfDirectory(at: users, includingPropertiesForKeys: nil)
+        else {
             return nil
         }
         return homes.lazy.map {
