@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Ways into a game from outside the window. A whisky:// URL scheme launches a
+  Steam game (whisky://launch?steam=<appid>) or a pinned program
+  (whisky://launch?pin=<name>), optionally scoped to a bottle. Only games
+  installed in one of your bottles and pins that exist resolve; anything
+  else is refused before Steam is involved. A URL arrival names what it is
+  about to launch and asks first, with a per-target "always allow" so the
+  dialog does not nag on repeat. The Dock menu lists your pins and launches
+  them without confirming, since you are already in the app, and dropping an
+  executable anywhere on the window opens the same run-this-file sheet as
+  opening it from Finder (#226, part of #172).
 - Discord integration, off by default and per bottle: Whisky can publish the
   running program as your Discord presence, and games that speak Discord's
   IPC themselves are bridged from inside the bottle to the host client, so
