@@ -36,6 +36,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   instead of raw localization keys (#208).
 
 ### Changed
+- DLSS frame generation is now its own bottle setting, off by default, instead
+  of riding on the MetalFX toggle. Both reach MetalFX through the same bridge,
+  but frame generation ended the login session on the machine it was measured
+  on: every command buffer carrying MetalFX work failed and WindowServer wedged
+  in the GPU driver until its watchdog killed it. Upscaling is unaffected and
+  stays on. Some NVIDIA Streamline titles refuse to start with frame generation
+  off, Deep Rock Galactic among them, so those need the toggle flipped for that
+  bottle (#231).
 - The per-bottle Steam library screen has been removed; the library on the
   landing screen does that job for every bottle at once (#206).
 - The bottle action bar now emphasizes Run as its primary control, with
@@ -63,7 +71,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   D3DMetal, since DXVK has no d3d12, so stripping it left every one of them
   reporting that frame generation needs GPU hardware scheduling turned on. It
   now survives the DXVK and DXMT overrides, and is still dropped for wined3d,
-  which is the one path with no D3DMetal behind it (#225).
+  which is the one path with no D3DMetal behind it. The variable is only set
+  at all when the bottle's frame generation toggle is on (#225, #231).
 - Games that decode video themselves no longer fall back to a broken
   half-resolution path under D3DMetal: when the runtime ships the D3D12
   video processor interposer, it is installed automatically alongside the
@@ -95,7 +104,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A D3DMetal bottle answers when a game asks whether hardware accelerated GPU
   scheduling is available. Wine only answers that query for a caller that says
   it is running on D3DMetal, and nothing said so, so the answer was always that
-  the feature is not implemented.
+  the feature is not implemented. Since #231 the bottle says so only when its
+  frame generation toggle is on.
 - DirectX 12 games run again in a bottle set to DXVK or DXMT. Neither ships a
   d3d12 of its own and neither said so, so that one DLL quietly fell through to
   D3DMetal while the rest of the stack was not. A DX12 game took its adapter
