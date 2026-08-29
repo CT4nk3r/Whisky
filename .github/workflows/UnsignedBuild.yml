@@ -1,22 +1,45 @@
 name: Unsigned Build
 
+# Fork-only convenience workflow. Builds the checked-out branch without code
+# signing and uploads Whisky.app as a downloadable zip, so testers can grab a
+# build straight from the Actions run. Manual-only (workflow_dispatch) so it
+# never runs on upstream pushes or pull requests.
 on:
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# Keep the toolchain in lockstep with CI.yml.
+env:
+  XCODE_VERSION: 'latest-stable'
+
 jobs:
   build:
     name: Build unsigned Whisky.app
     runs-on: macos-15
+
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v6
 
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: latest-stable
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      # Same cache paths/key as the CI "Build all schemes" job so a dispatch
+      # here can reuse SPM dependencies resolved by a prior CI run.
+      - name: Cache SPM Dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData/*/SourcePackages
+            .build
+            WhiskyKit/.build
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
 
       - name: Build
         run: |
@@ -30,18 +53,24 @@ jobs:
 
       - name: Package app
         run: |
+          # Resolve the exact product path instead of globbing DerivedData, which
+          # can also match WhiskyUITests-Runner.app.
           app=$(xcodebuild -project Whisky.xcodeproj -scheme Whisky -configuration Debug \
             -showBuildSettings 2>/dev/null \
             | awk -F' = ' '
                 /^ *BUILT_PRODUCTS_DIR = /  { dir = $2 }
                 /^ *FULL_PRODUCT_NAME = /   { name = $2 }
                 END { if (dir != "" && name != "") print dir "/" name }')
-          [ -d "$app" ] || { echo "::error::Whisky.app was not built"; exit 1; }
+          if [ -z "$app" ] || [ ! -d "$app" ]; then
+            echo "::error::Whisky.app was not built (resolved to '${app:-<empty>}')"
+            exit 1
+          fi
+          echo "Packaging $app"
           mkdir -p unsigned-build
           ditto -c -k --sequesterRsrc --keepParent "$app" unsigned-build/Whisky-unsigned.zip
 
       - name: Upload unsigned app
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: Whisky-unsigned
           path: unsigned-build/Whisky-unsigned.zip
