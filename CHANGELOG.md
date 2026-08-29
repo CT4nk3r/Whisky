@@ -68,6 +68,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   either position (#216).
 
 ### Fixed
+- Five labels showed their raw localization key instead of text: the
+  "currently using" line on the Recommended graphics card and the helper
+  under it, the detected display size next to Virtual Desktop, and the exit
+  code badge and footer in the console. Each interpolates a value, and the
+  catalog only carried the plain key.
+- "Analyze last run" and "View Latest Diagnosis" no longer open a small empty
+  sheet that only cmd-period could dismiss. The sheet was presented on a flag
+  while its content read a separate optional, which SwiftUI can evaluate
+  before the value lands; both are presented from the value itself now.
+- The bottle's "Export Diagnostic Report" and "View Latest Diagnosis" buttons
+  can enable. A recorded crash diagnosis never stamped the program's last
+  diagnosis date, so the buttons stayed disabled forever and the ZIP export
+  was unreachable.
+- The crash diagnosis sheet has a Done button. It had no control of its own,
+  so the only way out was cmd-period or closing the window behind it.
+- "Analyze last run" is disabled until the program has a run to analyze.
+  Before the first run it clicked through to nothing.
+- The crash diagnosis history on a program's page refreshes when a diagnosis
+  is recorded while the page is open, instead of waiting for it to be reopened.
+- A program pinned in a bottle created during the same session now shows up
+  in the library, the Dock menu, and the menu bar extra right away. The
+  bottle list was rebuilt at the end of creation, so the bottle page kept
+  writing to an instance the rest of the app no longer read.
+- "Terminate Wine processes when Whisky closes" (and a bottle's Always Kill
+  policy) now actually ends the bottle's processes on quit. Two things kept
+  it from working: the setting read as off until the toggle had been touched
+  once, because its default was never written to disk, and the kill was
+  queued asynchronously from the termination handler, so the app exited
+  before it ran.
+- "Audio Troubleshooting" no longer opens as a small empty sheet. Same cause
+  as the diagnosis sheet: presented on a flag while the content read a
+  separate optional; it is presented from the engine itself now.
 - Diagnostic exports with "Include sensitive details" off no longer carry
   credentials in plain sight. Launch arguments were written to the archive
   verbatim regardless of the toggle, and log redaction only rewrote the home
