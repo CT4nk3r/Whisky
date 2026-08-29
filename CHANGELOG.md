@@ -64,6 +64,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   either position (#216).
 
 ### Fixed
+- The launch failure alert from the menu bar extra showed its raw localization
+  key as a title instead of "Couldn't launch <name>". The key was looked up
+  with the program name baked in, so it never matched the catalog entry; the
+  name is now substituted into the translated string. The same alert serves
+  Dock menu and whisky:// launches, so it would have shown far more often.
 - Games that check the graphics driver version can start. D3DMetal answers the
   DXGI query with success and a version of -1, which reads back as
   65535.65535.65535.65535 and fails every minimum-driver check: Helldivers 2 put
