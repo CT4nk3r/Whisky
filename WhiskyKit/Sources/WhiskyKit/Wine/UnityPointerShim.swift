@@ -135,4 +135,60 @@ enum UnityPointerShim {
         try data.write(to: temporary, options: .atomic)
         try FileManager.default.moveItem(at: temporary, to: destination)
     }
+
+    /// Fixes every Steam-installed Unity game in the bottle that the pointer
+    /// stubs broke, so a title started from Steam's own window — a child of
+    /// steam.exe that Whisky never launches directly — is covered too.
+    ///
+    /// - Returns: The main executable names that need `version=native,builtin`,
+    ///   for the caller to persist as per-executable `AppDefaults` overrides.
+    static func prepareInstalledSteamGames(in bottle: Bottle) async -> Set<String> {
+        var executables: Set<String> = []
+        for game in SteamLibrary.enumerate(bottleURL: bottle.url) {
+            for gameDirectory in unityGameDirectories(under: game.installURL) {
+                guard let executable = mainExecutable(in: gameDirectory) else { continue }
+                if await prepare(in: gameDirectory, bottle: bottle) {
+                    executables.insert(executable)
+                }
+            }
+        }
+        return executables
+    }
+
+    /// The install root and its immediate subdirectories that hold a
+    /// `UnityPlayer.dll` — the folder a Unity game's shim belongs in.
+    ///
+    /// Steam commonly nests the payload one level below the library folder
+    /// (`common/<title>/<title>/`), so both depths are checked.
+    static func unityGameDirectories(under installURL: URL) -> [URL] {
+        let fileManager = FileManager.default
+        var directories = [installURL]
+        let top = (try? fileManager.contentsOfDirectory(
+            at: installURL, includingPropertiesForKeys: [.isDirectoryKey]
+        )) ?? []
+        directories += top.filter {
+            (try? $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true
+        }
+        return directories.filter {
+            fileManager.fileExists(atPath: $0.appending(path: "UnityPlayer.dll").path)
+        }
+    }
+
+    /// The game's own executable in `gameDirectory`, identified by Unity's
+    /// `<name>.exe` / `<name>_Data` pairing so helpers such as
+    /// `UnityCrashHandler64.exe` are never matched.
+    static func mainExecutable(in gameDirectory: URL) -> String? {
+        let contents = (try? FileManager.default.contentsOfDirectory(
+            at: gameDirectory, includingPropertiesForKeys: nil
+        )) ?? []
+        let dataStems = Set(
+            contents
+                .filter { $0.lastPathComponent.hasSuffix("_Data") }
+                .map { String($0.lastPathComponent.dropLast("_Data".count)) }
+        )
+        return contents.first {
+            $0.pathExtension.lowercased() == "exe"
+                && dataStems.contains($0.deletingPathExtension().lastPathComponent)
+        }?.lastPathComponent
+    }
 }

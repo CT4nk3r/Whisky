@@ -321,6 +321,23 @@ public class Wine {
             applyToDescendants: overridesApplyToDescendants
         )
 
+        // A game started from Steam's own window is a child of steam.exe that
+        // Whisky never launches directly, so its shim can't be installed at its
+        // own runProgram. When Steam itself starts, fix every installed Unity
+        // game that needs it and persist each per-executable version override so
+        // the proxy loads whichever way the game is started.
+        if url.lastPathComponent.caseInsensitiveCompare("steam.exe") == .orderedSame {
+            let shimmedExecutables = await UnityPointerShim.prepareInstalledSteamGames(in: bottle)
+            if !shimmedExecutables.isEmpty {
+                try? await syncDLLOverrides(
+                    bottle: bottle,
+                    scopes: shimmedExecutables.map {
+                        (scope: DLLOverrideScope.program($0), overrides: "version=native,builtin")
+                    }
+                )
+            }
+        }
+
         // Create a run log entry to track this session
         let programName = url.lastPathComponent
         var runLogEntry = RunLogEntry(programName: programName, logFileName: logFileURL.lastPathComponent)

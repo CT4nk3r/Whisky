@@ -273,4 +273,33 @@ final class DLLOverrideRegistryTests: XCTestCase {
         XCTAssertTrue(doc.contains(#"[-HKCU\A]"#), "the prune must still be emitted")
         XCTAssertFalse(doc.contains(#"[HKCU\A]"#), "no empty key should be recreated")
     }
+
+    /// Steam nests the payload one level below the library folder, so the shim's
+    /// directory scan must look past the install root to find UnityPlayer.dll.
+    func testUnityGameDirectoriesFindsANestedUnityPayload() throws {
+        let root = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        let nested = root.appending(path: "How to Fish")
+        try FileManager.default.createDirectory(at: nested, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        try Data().write(to: nested.appending(path: "UnityPlayer.dll"))
+
+        XCTAssertEqual(
+            UnityPointerShim.unityGameDirectories(under: root).map { $0.lastPathComponent },
+            ["How to Fish"]
+        )
+    }
+
+    /// The override is keyed on the game's own exe, so the Unity `<name>_Data`
+    /// pairing must pick it out and never a helper like the crash handler.
+    func testMainExecutableMatchesTheUnityDataFolderAndSkipsHelpers() throws {
+        let folder = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        try FileManager.default.createDirectory(
+            at: folder.appending(path: "How to Fish_Data"), withIntermediateDirectories: true
+        )
+        defer { try? FileManager.default.removeItem(at: folder) }
+        try Data().write(to: folder.appending(path: "How to Fish.exe"))
+        try Data().write(to: folder.appending(path: "UnityCrashHandler64.exe"))
+
+        XCTAssertEqual(UnityPointerShim.mainExecutable(in: folder), "How to Fish.exe")
+    }
 }
