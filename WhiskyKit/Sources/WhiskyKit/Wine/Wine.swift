@@ -233,6 +233,27 @@ public class Wine {
         public let runLogEntryId: UUID
     }
 
+    /// Installs the Unity pointer shim for the bottle's Steam games when Steam
+    /// itself is what is being launched.
+    ///
+    /// A game started from Steam's own window is a child of steam.exe that
+    /// Whisky never launches directly, so its shim can't be installed at its own
+    /// runProgram. Doing it when Steam starts — and persisting each game's
+    /// `version=native,builtin` AppDefaults override — makes the proxy load
+    /// whichever way the game is started.
+    @MainActor
+    private static func installSteamGamePointerShims(for url: URL, bottle: Bottle) async {
+        guard url.lastPathComponent.caseInsensitiveCompare("steam.exe") == .orderedSame else { return }
+        let shimmedExecutables = await UnityPointerShim.prepareInstalledSteamGames(in: bottle)
+        guard !shimmedExecutables.isEmpty else { return }
+        try? await syncDLLOverrides(
+            bottle: bottle,
+            scopes: shimmedExecutables.map {
+                (scope: DLLOverrideScope.program($0), overrides: "version=native,builtin")
+            }
+        )
+    }
+
     // swiftlint:disable function_body_length
     @discardableResult
     @MainActor
@@ -321,22 +342,7 @@ public class Wine {
             applyToDescendants: overridesApplyToDescendants
         )
 
-        // A game started from Steam's own window is a child of steam.exe that
-        // Whisky never launches directly, so its shim can't be installed at its
-        // own runProgram. When Steam itself starts, fix every installed Unity
-        // game that needs it and persist each per-executable version override so
-        // the proxy loads whichever way the game is started.
-        if url.lastPathComponent.caseInsensitiveCompare("steam.exe") == .orderedSame {
-            let shimmedExecutables = await UnityPointerShim.prepareInstalledSteamGames(in: bottle)
-            if !shimmedExecutables.isEmpty {
-                try? await syncDLLOverrides(
-                    bottle: bottle,
-                    scopes: shimmedExecutables.map {
-                        (scope: DLLOverrideScope.program($0), overrides: "version=native,builtin")
-                    }
-                )
-            }
-        }
+        await installSteamGamePointerShims(for: url, bottle: bottle)
 
         // Create a run log entry to track this session
         let programName = url.lastPathComponent

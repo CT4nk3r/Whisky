@@ -284,7 +284,7 @@ final class DLLOverrideRegistryTests: XCTestCase {
         try Data().write(to: nested.appending(path: "UnityPlayer.dll"))
 
         XCTAssertEqual(
-            UnityPointerShim.unityGameDirectories(under: root).map { $0.lastPathComponent },
+            UnityPointerShim.unityGameDirectories(under: root).map(\.lastPathComponent),
             ["How to Fish"]
         )
     }
