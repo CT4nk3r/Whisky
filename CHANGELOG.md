@@ -7,7 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.7.0] - 2026-08-29 (App)
+
 ### Added
+- Failed dependency installs now record the last few KB of winetricks output
+  in dependency-history.plist alongside the exit code, so the reason for a
+  failure (such as a vc_redist checksum mismatch) is on disk next to the
+  attempt instead of lost with the process (#233).
+- Ways into a game from outside the window. A whisky:// URL scheme launches a
+  Steam game (whisky://launch?steam=<appid>) or a pinned program
+  (whisky://launch?pin=<name>), optionally scoped to a bottle. Only games
+  installed in one of your bottles and pins that exist resolve; anything
+  else is refused before Steam is involved. A URL arrival names what it is
+  about to launch and asks first, with a per-target "always allow" so the
+  dialog does not nag on repeat. The Dock menu lists your pins and launches
+  them without confirming, since you are already in the app, and dropping an
+  executable anywhere on the window opens the same run-this-file sheet as
+  opening it from Finder (#226, part of #172).
 - Discord integration, off by default and per bottle: Whisky can publish the
   running program as your Discord presence, and games that speak Discord's
   IPC themselves are bridged from inside the bottle to the host client, so
@@ -36,6 +52,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   instead of raw localization keys (#208).
 
 ### Changed
+- DLSS frame generation is now its own bottle setting, off by default, instead
+  of riding on the MetalFX toggle. Both reach MetalFX through the same bridge,
+  but frame generation ended the login session on the machine it was measured
+  on: every command buffer carrying MetalFX work failed and WindowServer wedged
+  in the GPU driver until its watchdog killed it. Upscaling is unaffected and
+  stays on. Some NVIDIA Streamline titles refuse to start with frame generation
+  off, Deep Rock Galactic among them, so those need the toggle flipped for that
+  bottle (#231).
 - The per-bottle Steam library screen has been removed; the library on the
   landing screen does that job for every bottle at once (#206).
 - The bottle action bar now emphasizes Run as its primary control, with
@@ -46,6 +70,113 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   either position (#216).
 
 ### Fixed
+- Installing the Visual C++ Runtime no longer stalls on an invisible install
+  wizard. winetricks was run without -q, so the vc_redist installer showed
+  its setup dialog inside the prefix and waited for a click nothing in the
+  Dependencies panel prompts for -- the process never exited, the
+  winetricks.log entry was never written, and the panel stayed on "Not
+  Installed" even after a successful install. The vcrun verbs now run
+  unattended (#233).
+- Five labels showed their raw localization key instead of text: the
+  "currently using" line on the Recommended graphics card and the helper
+  under it, the detected display size next to Virtual Desktop, and the exit
+  code badge and footer in the console. Each interpolates a value, and the
+  catalog only carried the plain key.
+- "Analyze last run" and "View Latest Diagnosis" no longer open a small empty
+  sheet that only cmd-period could dismiss. The sheet was presented on a flag
+  while its content read a separate optional, which SwiftUI can evaluate
+  before the value lands; both are presented from the value itself now.
+- The bottle's "Export Diagnostic Report" and "View Latest Diagnosis" buttons
+  can enable. A recorded crash diagnosis never stamped the program's last
+  diagnosis date, so the buttons stayed disabled forever and the ZIP export
+  was unreachable.
+- The crash diagnosis sheet has a Done button. It had no control of its own,
+  so the only way out was cmd-period or closing the window behind it.
+- "Analyze last run" is disabled until the program has a run to analyze.
+  Before the first run it clicked through to nothing.
+- The crash diagnosis history on a program's page refreshes when a diagnosis
+  is recorded while the page is open, instead of waiting for it to be reopened.
+- A program pinned in a bottle created during the same session now shows up
+  in the library, the Dock menu, and the menu bar extra right away. The
+  bottle list was rebuilt at the end of creation, so the bottle page kept
+  writing to an instance the rest of the app no longer read.
+- "Terminate Wine processes when Whisky closes" (and a bottle's Always Kill
+  policy) now actually ends the bottle's processes on quit. Two things kept
+  it from working: the setting read as off until the toggle had been touched
+  once, because its default was never written to disk, and the kill was
+  queued asynchronously from the termination handler, so the app exited
+  before it ran.
+- "Audio Troubleshooting" no longer opens as a small empty sheet. Same cause
+  as the diagnosis sheet: presented on a flag while the content read a
+  separate optional; it is presented from the engine itself now.
+- The bottle's Terminal button works for bottles whose name contains a space.
+  The name was backslash-escaped inside double quotes, so the shell passed
+  the backslashes through and WhiskyCmd reported that no such bottle exists.
+- Guided troubleshooting no longer dead-ends on a findings card. Info steps
+  such as "Missing dependencies found" only carry a Continue transition, and
+  nothing followed it; the wizard now shows a Continue button there, and Skip
+  moves on as well.
+- Guided troubleshooting no longer reports "Problem resolved" when it has
+  run out of automated steps. The flows' escalation node shares the export
+  phase with the resolved node, and the wizard drew both the same way; a node
+  that hands off to the escalation fragment now shows the escalation screen
+  with its export and retry options.
+- Applying a game configuration now sets the graphics backend it lists. The
+  entry's legacy DXVK flag was written after the backend and its "off" value
+  meant "back to Recommended", so every apply ended on Recommended while the
+  toast said it had applied. The preview also no longer lists Sequoia
+  Compatibility Mode, a setting that no longer exists.
+- Export as Archive writes the bottle as `<folder>/...` entries instead of
+  its absolute path, so the archive no longer carries the user's home
+  directory name and extracts where it is opened. Neither export carries
+  AppleDouble `._` files any more.
+- The Duplicate Bottle sheet's confirm button says Duplicate, not Rename.
+- Guided troubleshooting's install step names the verb it will install after
+  a resumed session, and its game-database check sees the program the wizard
+  was opened from.
+- Cancelling a dependency install stops it. Cancel only closed the sheet,
+  leaving winetricks and the installer it had spawned running in the bottle;
+  it now cancels the install and ends the bottle's Wine processes.
+- Diagnostic exports with "Include sensitive details" off no longer carry
+  credentials in plain sight. Launch arguments were written to the archive
+  verbatim regardless of the toggle, and log redaction only rewrote the home
+  path, so a `-token` argument or a bearer token a game logged went out in a
+  ZIP the sheet described as scrubbed. Arguments and both log members now
+  have common secret shapes removed (`name=value` and `--name value` forms
+  for token, password, secret and key style names, Bearer and Basic
+  credentials, URL user info, sensitive query parameters, JWTs), and the
+  sheet says so. It is best effort by nature; the toggle still exports raw.
+- Running a winetricks verb from the bottle's Winetricks screen no longer
+  hands the bottle's path to the terminal as shell text. A bottle imported
+  from a directory whose name carried `$(...)` or backticks would have had
+  that executed in the user's terminal; the command now goes through a temp
+  script with every value quoted, the same route as the bottle's own Open
+  Terminal, which also means it follows the preferred terminal setting
+  (iTerm and Warp) instead of always opening Terminal.
+- A Windows executable whose icon declares a bitmap height of exactly
+  -2147483648 no longer crashes Whisky while the library renders its icon.
+  The parser took the absolute value of that height before checking its
+  range, and that value has no absolute value in 32 bits.
+- Installing the Visual C++ Runtime from the Dependencies panel no longer
+  fails silently on a stale checksum. Microsoft rotates the vc_redist
+  binaries in place, so the SHA256 sums pinned in the bundled winetricks go
+  stale between releases and the unattended install aborted with exit 1,
+  leaving the panel on "Not Installed" with no hint why. The vcrun verbs now
+  run with --force; every other verb keeps checksum enforcement (#233).
+- A bottle opened on a runtime from the other Wine lineage no longer starts
+  with an empty profile. Every Wine build names the profile after your Unix
+  user, but CrossOver-lineage builds (the GPTK-capable v4 engines) hardcode
+  `users/crossover` for the shell folders, so the same bottle had two profile
+  directories depending on the engine and apps in it saw whichever was empty:
+  Steam asked for a login again, saves were gone, nothing errored. Whisky now
+  makes the profile reachable under both names before every launch, and only
+  ever displaces a directory that is an untouched skeleton (moved aside inside
+  the bottle, never deleted). Two populated profiles are left alone.
+- The launch failure alert from the menu bar extra showed its raw localization
+  key as a title instead of "Couldn't launch <name>". The key was looked up
+  with the program name baked in, so it never matched the catalog entry; the
+  name is now substituted into the translated string. The same alert serves
+  Dock menu and whisky:// launches, so it would have shown far more often.
 - Games that check the graphics driver version can start. D3DMetal answers the
   DXGI query with success and a version of -1, which reads back as
   65535.65535.65535.65535 and fails every minimum-driver check: Helldivers 2 put
@@ -63,7 +194,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   D3DMetal, since DXVK has no d3d12, so stripping it left every one of them
   reporting that frame generation needs GPU hardware scheduling turned on. It
   now survives the DXVK and DXMT overrides, and is still dropped for wined3d,
-  which is the one path with no D3DMetal behind it (#225).
+  which is the one path with no D3DMetal behind it. The variable is only set
+  at all when the bottle's frame generation toggle is on (#225, #231).
 - Games that decode video themselves no longer fall back to a broken
   half-resolution path under D3DMetal: when the runtime ships the D3D12
   video processor interposer, it is installed automatically alongside the
@@ -95,7 +227,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A D3DMetal bottle answers when a game asks whether hardware accelerated GPU
   scheduling is available. Wine only answers that query for a caller that says
   it is running on D3DMetal, and nothing said so, so the answer was always that
-  the feature is not implemented.
+  the feature is not implemented. Since #231 the bottle says so only when its
+  frame generation toggle is on.
 - DirectX 12 games run again in a bottle set to DXVK or DXMT. Neither ships a
   d3d12 of its own and neither said so, so that one DLL quietly fell through to
   D3DMetal while the rest of the stack was not. A DX12 game took its adapter
