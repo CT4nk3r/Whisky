@@ -250,7 +250,12 @@ public class Wine {
             bottle: bottle,
             scopes: shimmedExecutables.map {
                 (scope: DLLOverrideScope.program($0), overrides: "version=native,builtin")
-            }
+            },
+            // Merge, not replace: add the proxy's `version` override without
+            // clearing a game's own AppDefaults. A replace here wiped a
+            // per-game `d3d12=builtin` and dropped a DXMT/DXVK bottle's Unity 6
+            // titles back into the delay-load crash that override was avoiding.
+            replaceExisting: false
         )
     }
 

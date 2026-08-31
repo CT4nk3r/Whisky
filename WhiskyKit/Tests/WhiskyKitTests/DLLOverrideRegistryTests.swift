@@ -274,6 +274,32 @@ final class DLLOverrideRegistryTests: XCTestCase {
         XCTAssertFalse(doc.contains(#"[HKCU\A]"#), "no empty key should be recreated")
     }
 
+    /// A merge omits the `[-Key]` prune, so `reg import` keeps the key's other
+    /// values. The pointer-shim proxy adds `version` this way, where a replace
+    /// wiped a per-game `d3d12=builtin` and put a DXMT/DXVK bottle's Unity 6
+    /// titles back into the d3d12 delay-load crash that override was avoiding.
+    func testMergeDoesNotPruneTheKey() {
+        let doc = Wine.registryDocument(
+            for: [(
+                key: #"HKCU\Software\Wine\AppDefaults\How to Fish.exe\DllOverrides"#,
+                overrides: ["version": "native,builtin"]
+            )],
+            replaceExisting: false
+        )
+        XCTAssertFalse(doc.contains("[-HKCU"), "a merge must not delete the key first")
+        XCTAssertTrue(doc.contains(
+            #"[HKCU\Software\Wine\AppDefaults\How to Fish.exe\DllOverrides]"#
+        ))
+        XCTAssertTrue(doc.contains(#""version"="native,builtin""#))
+    }
+
+    /// The default stays a replace, so a backend sync keeps pruning what the
+    /// previous one wrote.
+    func testReplaceRemainsTheDefault() {
+        let doc = Wine.registryDocument(for: [(key: #"HKCU\A"#, overrides: ["d3d11": "n,b"])])
+        XCTAssertTrue(doc.contains(#"[-HKCU\A]"#))
+    }
+
     /// Steam nests the payload one level below the library folder, so the shim's
     /// directory scan must look past the install root to find UnityPlayer.dll.
     func testUnityGameDirectoriesFindsANestedUnityPayload() throws {

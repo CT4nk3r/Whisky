@@ -43,7 +43,7 @@ public extension Wine {
         subsystem: "com.isaacmarovitz.WhiskyKit", category: "dll-overrides"
     )
 
-    /// Replaces the DLL overrides at each scope, in one import.
+    /// Writes the DLL overrides at each scope, in one import.
     ///
     /// One import rather than a `reg` call per value: each of those is a whole
     /// wine process, and a launch syncing a bottle plus a launcher and its
@@ -53,12 +53,18 @@ public extension Wine {
     ///   - bottle: The bottle whose prefix registry is written.
     ///   - scopes: Each scope and the `WINEDLLOVERRIDES`-syntax string it
     ///     should hold. An empty string clears that scope.
+    ///   - replaceExisting: Replace each scope, pruning stale values. When
+    ///     `false`, merge instead — add or update the named values and leave
+    ///     any others in place.
     @MainActor
     static func syncDLLOverrides(
-        bottle: Bottle, scopes: [(scope: DLLOverrideScope, overrides: String)]
+        bottle: Bottle,
+        scopes: [(scope: DLLOverrideScope, overrides: String)],
+        replaceExisting: Bool = true
     ) async throws {
         let document = registryDocument(
-            for: scopes.map { (key: $0.scope.registryKey, overrides: parseDLLOverrides($0.overrides)) }
+            for: scopes.map { (key: $0.scope.registryKey, overrides: parseDLLOverrides($0.overrides)) },
+            replaceExisting: replaceExisting
         )
         let url = FileManager.default.temporaryDirectory
             .appending(path: "whisky-dll-overrides-\(UUID().uuidString).reg")
@@ -126,15 +132,22 @@ public extension Wine {
         try await syncDLLOverrides(bottle: bottle, scopes: scopes)
     }
 
-    /// Renders a `.reg` leaving each key holding exactly `overrides`.
+    /// Renders a `.reg` writing `overrides` to each key.
     ///
-    /// `[-Key]` then `[Key]` is a replace, since `.reg` runs in order. That is
-    /// what prunes stale values without reading the key back first.
-    static func registryDocument(for scopes: [(key: String, overrides: [String: String])]) -> String {
+    /// With `replaceExisting`, `[-Key]` then `[Key]` replaces the key, since
+    /// `.reg` runs in order — that prunes stale values without reading the key
+    /// back first. Without it only `[Key]` is written, so `reg import` merges:
+    /// the named values are added or updated and any others are left in place.
+    static func registryDocument(
+        for scopes: [(key: String, overrides: [String: String])],
+        replaceExisting: Bool = true
+    ) -> String {
         var lines = ["Windows Registry Editor Version 5.00", ""]
         for scope in scopes {
-            lines.append("[-\(scope.key)]")
-            lines.append("")
+            if replaceExisting {
+                lines.append("[-\(scope.key)]")
+                lines.append("")
+            }
             let renderable = scope.overrides
                 .filter { isRenderable(dll: $0.key, mode: $0.value) }
                 .sorted { $0.key < $1.key }
