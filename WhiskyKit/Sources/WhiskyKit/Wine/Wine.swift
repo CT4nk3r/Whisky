@@ -233,6 +233,32 @@ public class Wine {
         public let runLogEntryId: UUID
     }
 
+    /// Installs the Unity pointer shim for the bottle's Steam games when Steam
+    /// itself is what is being launched.
+    ///
+    /// A game started from Steam's own window is a child of steam.exe that
+    /// Whisky never launches directly, so its shim can't be installed at its own
+    /// runProgram. Doing it when Steam starts — and persisting each game's
+    /// `version=native,builtin` AppDefaults override — makes the proxy load
+    /// whichever way the game is started.
+    @MainActor
+    private static func installSteamGamePointerShims(for url: URL, bottle: Bottle) async {
+        guard url.lastPathComponent.caseInsensitiveCompare("steam.exe") == .orderedSame else { return }
+        let shimmedExecutables = await UnityPointerShim.prepareInstalledSteamGames(in: bottle)
+        guard !shimmedExecutables.isEmpty else { return }
+        try? await syncDLLOverrides(
+            bottle: bottle,
+            scopes: shimmedExecutables.map {
+                (scope: DLLOverrideScope.program($0), overrides: "version=native,builtin")
+            },
+            // Merge, not replace: add the proxy's `version` override without
+            // clearing a game's own AppDefaults. A replace here wiped a
+            // per-game `d3d12=builtin` and dropped a DXMT/DXVK bottle's Unity 6
+            // titles back into the delay-load crash that override was avoiding.
+            replaceExisting: false
+        )
+    }
+
     // swiftlint:disable function_body_length
     @discardableResult
     @MainActor
@@ -265,6 +291,13 @@ public class Wine {
             var pinned = programOverrides ?? ProgramOverrides()
             pinned.graphicsBackend = effectiveBackend
             programOverrides = pinned
+        }
+
+        // Wine 11 exposes Unity 6's pointer APIs as stubs. If the game's own
+        // Player.log proves it hit that path, install the scoped proxy and add
+        // the matching native-first override for this launch.
+        if await UnityPointerShim.prepare(for: url, in: bottle) {
+            programOverrides = UnityPointerShim.addingVersionOverride(to: programOverrides)
         }
 
         try prepareBackendPrefix(effectiveBackend, bottle: bottle)
@@ -313,6 +346,8 @@ public class Wine {
             wineEnvironment: &wineEnvironment,
             applyToDescendants: overridesApplyToDescendants
         )
+
+        await installSteamGamePointerShims(for: url, bottle: bottle)
 
         // Create a run log entry to track this session
         let programName = url.lastPathComponent

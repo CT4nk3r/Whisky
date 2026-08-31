@@ -80,7 +80,7 @@ public extension Wine {
     ///
     /// - Parameter output: The raw string output from `tasklist.exe`.
     /// - Returns: An array of parsed ``WineProcess`` instances.
-    static func parseTasklistOutput(_ output: String) -> [WineProcess] {
+    public static func parseTasklistOutput(_ output: String) -> [WineProcess] {
         let lines = output.split(omittingEmptySubsequences: true, whereSeparator: \.isNewline)
         var processes: [WineProcess] = []
         processes.reserveCapacity(lines.count)

@@ -36,6 +36,48 @@ final class DLLOverrideRegistryTests: XCTestCase {
         )
     }
 
+    /// Unity 6 titles that ship a version.dll pointer shim need this exact
+    /// per-executable entry. Keeping it out of `WINEDLLOVERRIDES` ensures the
+    /// native preference does not leak from the game into any child process.
+    func testUnityPointerShimRendersANativeThenBuiltinProgramOverride() {
+        let scope = Wine.DLLOverrideScope.program("How to Fish.exe")
+        let document = Wine.registryDocument(for: [
+            (key: scope.registryKey, overrides: ["version": "native,builtin"])
+        ])
+
+        XCTAssertTrue(document.contains(
+            #"[HKCU\Software\Wine\AppDefaults\How to Fish.exe\DllOverrides]"#
+        ))
+        XCTAssertTrue(document.contains(#""version"="native,builtin""#))
+        XCTAssertFalse(document.contains("WINEDLLOVERRIDES"))
+    }
+
+    func testUnityPointerShimOverrideReplacesAnExistingVersionSetting() {
+        var inherited = ProgramOverrides()
+        inherited.dllOverrides = [
+            DLLOverrideEntry(dllName: "version", mode: .builtin),
+            DLLOverrideEntry(dllName: "xaudio2_7", mode: .native)
+        ]
+
+        let fixed = UnityPointerShim.addingVersionOverride(to: inherited)
+
+        XCTAssertEqual(
+            fixed.dllOverrides?.filter { $0.dllName == "version" },
+            [DLLOverrideEntry(dllName: "version", mode: .nativeThenBuiltin)]
+        )
+        XCTAssertTrue(fixed.dllOverrides?.contains(DLLOverrideEntry(dllName: "xaudio2_7", mode: .native)) == true)
+    }
+
+    func testUnityPointerShimRecognizesItsInstalledProxy() throws {
+        let folder = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+
+        try Data("prefix WINE_PTRSHIM_MARKER_V1 suffix".utf8).write(to: folder.appending(path: "version.dll"))
+
+        XCTAssertTrue(UnityPointerShim.hasInstalledShim(in: folder))
+    }
+
     /// Two executables must land in different keys, which is the whole point:
     /// an environment variable could not separate a launcher from the games it
     /// spawns.
@@ -230,5 +272,85 @@ final class DLLOverrideRegistryTests: XCTestCase {
         let doc = Wine.registryDocument(for: [(key: #"HKCU\A"#, overrides: [#"bad"name"#: "native"])])
         XCTAssertTrue(doc.contains(#"[-HKCU\A]"#), "the prune must still be emitted")
         XCTAssertFalse(doc.contains(#"[HKCU\A]"#), "no empty key should be recreated")
+    }
+
+    /// A merge omits the `[-Key]` prune, so `reg import` keeps the key's other
+    /// values. The pointer-shim proxy adds `version` this way, where a replace
+    /// wiped a per-game `d3d12=builtin` and put a DXMT/DXVK bottle's Unity 6
+    /// titles back into the d3d12 delay-load crash that override was avoiding.
+    func testMergeDoesNotPruneTheKey() {
+        let doc = Wine.registryDocument(
+            for: [(
+                key: #"HKCU\Software\Wine\AppDefaults\How to Fish.exe\DllOverrides"#,
+                overrides: ["version": "native,builtin"]
+            )],
+            replaceExisting: false
+        )
+        XCTAssertFalse(doc.contains("[-HKCU"), "a merge must not delete the key first")
+        XCTAssertTrue(doc.contains(
+            #"[HKCU\Software\Wine\AppDefaults\How to Fish.exe\DllOverrides]"#
+        ))
+        XCTAssertTrue(doc.contains(#""version"="native,builtin""#))
+    }
+
+    /// The default stays a replace, so a backend sync keeps pruning what the
+    /// previous one wrote.
+    func testReplaceRemainsTheDefault() {
+        let doc = Wine.registryDocument(for: [(key: #"HKCU\A"#, overrides: ["d3d11": "n,b"])])
+        XCTAssertTrue(doc.contains(#"[-HKCU\A]"#))
+    }
+
+    /// Steam nests the payload one level below the library folder, so the shim's
+    /// directory scan must look past the install root to find UnityPlayer.dll.
+    func testUnityGameDirectoriesFindsANestedUnityPayload() throws {
+        let root = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        let nested = root.appending(path: "How to Fish")
+        try FileManager.default.createDirectory(at: nested, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        try Data().write(to: nested.appending(path: "UnityPlayer.dll"))
+
+        XCTAssertEqual(
+            UnityPointerShim.unityGameDirectories(under: root).map(\.lastPathComponent),
+            ["How to Fish"]
+        )
+    }
+
+    /// The override is keyed on the game's own exe, so the Unity `<name>_Data`
+    /// pairing must pick it out and never a helper like the crash handler.
+    func testMainExecutableMatchesTheUnityDataFolderAndSkipsHelpers() throws {
+        let folder = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        try FileManager.default.createDirectory(
+            at: folder.appending(path: "How to Fish_Data"), withIntermediateDirectories: true
+        )
+        defer { try? FileManager.default.removeItem(at: folder) }
+        try Data().write(to: folder.appending(path: "How to Fish.exe"))
+        try Data().write(to: folder.appending(path: "UnityCrashHandler64.exe"))
+
+        XCTAssertEqual(UnityPointerShim.mainExecutable(in: folder), "How to Fish.exe")
+    }
+
+    /// A game that ships the DirectStorage runtime must be recognized, so a
+    /// launch can steer it onto D3DMetal where its d3d12 delay-load resolves.
+    func testShipsDirectStorageDetectsTheRuntimeBesideTheUnityPayload() throws {
+        let root = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        let payload = root.appending(path: "How to Fish")
+        try FileManager.default.createDirectory(at: payload, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        try Data().write(to: payload.appending(path: "UnityPlayer.dll"))
+        try Data().write(to: payload.appending(path: "dstoragecore.dll"))
+
+        XCTAssertTrue(UnityPointerShim.shipsDirectStorage(under: root))
+    }
+
+    /// A Unity game without DirectStorage must not be moved onto a backend it
+    /// has no need for.
+    func testShipsDirectStorageIsFalseWithoutTheRuntime() throws {
+        let root = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        let payload = root.appending(path: "Some Game")
+        try FileManager.default.createDirectory(at: payload, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        try Data().write(to: payload.appending(path: "UnityPlayer.dll"))
+
+        XCTAssertFalse(UnityPointerShim.shipsDirectStorage(under: root))
     }
 }

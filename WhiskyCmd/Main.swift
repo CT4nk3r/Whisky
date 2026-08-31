@@ -584,7 +584,7 @@ extension Whisky {
                 target = try SteamLauncher.resolveBottle(appId: appId, in: bottles)
             }
 
-            try SteamLauncher.launch(appId: appId, bottle: target)
+            try await Self.launchAndAwaitGame(appId: appId, bottle: target)
 
             if json {
                 let payload = [
@@ -599,6 +599,58 @@ extension Whisky {
             } else {
                 print("Launched \(appId) in \(target.settings.name)")
             }
+        }
+
+        /// Fires the launch and holds the command open until the game's process
+        /// appears. `SteamLauncher.launch` runs in a task that outlives a normal
+        /// command, so a bare return exits before it brings up the client and
+        /// game and nothing starts; the GUI keeps itself alive over the same wait.
+        @MainActor
+        private static func launchAndAwaitGame(appId: Int, bottle: Bottle) async throws {
+            let installURL = SteamLibrary.enumerate(bottleURL: bottle.url)
+                .first { $0.appId == appId }?.installURL
+
+            // Bring the client up first, as the GUI does: -applaunch on a client
+            // that is still cold can be dropped, and a running one keeps the
+            // game's own wait short.
+            if await runningImageNames(in: bottle).contains("steam.exe") == false,
+               let steamRoot = SteamLibrary.detectInstall(bottleURL: bottle.url) {
+                let steamExe = steamRoot.appending(path: "steam.exe")
+                Task { _ = try? await Wine.runProgram(at: steamExe, args: ["-silent"], bottle: bottle) }
+                _ = await waitForProcess(named: ["steam.exe"], in: bottle, timeout: 180)
+            }
+
+            _ = try SteamLauncher.launch(appId: appId, bottle: bottle, installURL: installURL)
+
+            if let installURL {
+                _ = await waitForProcess(
+                    named: SteamLibrary.executableNames(under: installURL), in: bottle, timeout: 180
+                )
+            }
+        }
+
+        /// The bottle's running process image names, lowercased, from tasklist.
+        @MainActor
+        private static func runningImageNames(in bottle: Bottle) async -> Set<String> {
+            let output = try? await Wine.runWine(["tasklist.exe", "/FO", "CSV"], bottle: bottle)
+            guard let output else { return [] }
+            return Set(Wine.parseTasklistOutput(output).map { $0.imageName.lowercased() })
+        }
+
+        /// Polls the bottle until any of `names` is running, up to `timeout`.
+        @MainActor
+        private static func waitForProcess(
+            named names: Set<String>, in bottle: Bottle, timeout: TimeInterval
+        ) async -> Bool {
+            guard !names.isEmpty else { return true }
+            let deadline = Date(timeIntervalSinceNow: timeout)
+            repeat {
+                if await !runningImageNames(in: bottle).isDisjoint(with: names) {
+                    return true
+                }
+                try? await Task.sleep(for: .seconds(3))
+            } while Date() < deadline && !Task.isCancelled
+            return false
         }
     }
 }
