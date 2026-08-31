@@ -174,6 +174,23 @@ enum UnityPointerShim {
         }
     }
 
+    /// Whether a Steam game ships DirectStorage, whose `d3d12` delay-load throws
+    /// `0xC06D007E` on a backend that disables `d3d12` — DXVK and DXMT both do.
+    /// D3DMetal keeps `d3d12` loadable, with its own DXGI, so the probe resolves
+    /// without the vtable mismatch that disabling `d3d12` exists to prevent.
+    ///
+    /// Keyed on the runtime's own DLL beside the Unity payload, so a title that
+    /// only has the pointer bug is never moved onto a backend it does not need.
+    static func shipsDirectStorage(under installURL: URL) -> Bool {
+        let runtimeDLLs: Set<String> = ["dstoragecore.dll", "dstorage.dll"]
+        return unityGameDirectories(under: installURL).contains { directory in
+            let contents = (try? FileManager.default.contentsOfDirectory(
+                at: directory, includingPropertiesForKeys: nil
+            )) ?? []
+            return contents.contains { runtimeDLLs.contains($0.lastPathComponent.lowercased()) }
+        }
+    }
+
     /// The game's own executable in `gameDirectory`, identified by Unity's
     /// `<name>.exe` / `<name>_Data` pairing so helpers such as
     /// `UnityCrashHandler64.exe` are never matched.

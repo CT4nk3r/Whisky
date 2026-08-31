@@ -328,4 +328,29 @@ final class DLLOverrideRegistryTests: XCTestCase {
 
         XCTAssertEqual(UnityPointerShim.mainExecutable(in: folder), "How to Fish.exe")
     }
+
+    /// A game that ships the DirectStorage runtime must be recognized, so a
+    /// launch can steer it onto D3DMetal where its d3d12 delay-load resolves.
+    func testShipsDirectStorageDetectsTheRuntimeBesideTheUnityPayload() throws {
+        let root = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        let payload = root.appending(path: "How to Fish")
+        try FileManager.default.createDirectory(at: payload, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        try Data().write(to: payload.appending(path: "UnityPlayer.dll"))
+        try Data().write(to: payload.appending(path: "dstoragecore.dll"))
+
+        XCTAssertTrue(UnityPointerShim.shipsDirectStorage(under: root))
+    }
+
+    /// A Unity game without DirectStorage must not be moved onto a backend it
+    /// has no need for.
+    func testShipsDirectStorageIsFalseWithoutTheRuntime() throws {
+        let root = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        let payload = root.appending(path: "Some Game")
+        try FileManager.default.createDirectory(at: payload, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        try Data().write(to: payload.appending(path: "UnityPlayer.dll"))
+
+        XCTAssertFalse(UnityPointerShim.shipsDirectStorage(under: root))
+    }
 }

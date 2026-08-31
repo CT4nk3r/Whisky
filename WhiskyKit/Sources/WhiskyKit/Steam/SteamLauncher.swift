@@ -80,6 +80,16 @@ public enum SteamLauncher {
             if let installURL, await UnityPointerShim.prepare(in: installURL, bottle: bottle) {
                 overrides = UnityPointerShim.addingVersionOverride(to: overrides)
             }
+            if let installURL,
+               overrides.graphicsBackend == nil || overrides.graphicsBackend == .recommended,
+               WhiskyWineInstaller.isD3DMetalInstalled(),
+               UnityPointerShim.shipsDirectStorage(under: installURL) {
+                // DirectStorage delay-loads d3d12, which DXVK and DXMT disable,
+                // so the probe throws 0xC06D007E. D3DMetal is the one backend
+                // that keeps d3d12 loadable without the DXGI/vtable mismatch
+                // disabling it guards against, so steer the game onto it.
+                overrides.graphicsBackend = .d3dMetal
+            }
             _ = try? await Wine.runProgram(
                 at: steamExe, args: ["-applaunch", String(appId)], bottle: bottle,
                 programOverrides: overrides,
