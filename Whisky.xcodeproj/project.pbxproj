@@ -128,12 +128,13 @@
 		FBD19F7BAD838BE3ABB2CCC2 /* LaunchResult+Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2516958D60EC8937A2AF71 /* LaunchResult+Toast.swift */; };
 		G1A2B3C4E5F60901A9B0C1D0 /* DependencyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = G1A2B3C4E5F60901A9B0C1D1 /* DependencyManager.swift */; };
 		AB5DECAF20260818000000D4 /* RemediationExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB5DECAF20260818000000D5 /* RemediationExecutor.swift */; };
+		AB5DECAF20260818000000D0 /* QuickLaunch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB5DECAF20260818000000D1 /* QuickLaunch.swift */; };
 		G1A2B3C4E5F60901A9B0C1D2 /* Winetricks+Install.swift in Sources */ = {isa = PBXBuildFile; fileRef = G1A2B3C4E5F60901A9B0C1D3 /* Winetricks+Install.swift */; };
 		H1A2B3C4E5F61001A9B0C1D0 /* LaunchTimeBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1A2B3C4E5F61001A9B0C1D1 /* LaunchTimeBanner.swift */; };
 		H1A2B3C4E5F61101A9B0C1D0 /* DependencyConfigSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1A2B3C4E5F61101A9B0C1D1 /* DependencyConfigSection.swift */; };
 		H1A2B3C4E5F61101A9B0C1D2 /* DependencyInstallSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1A2B3C4E5F61101A9B0C1D3 /* DependencyInstallSheet.swift */; };
 		I1A2B3C4E5F61201A9B0C1D0 /* SteamDownloadMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = I1A2B3C4E5F61201A9B0C1D1 /* SteamDownloadMonitor.swift */; };
-		129146529D772EC1C559C0CB /* SteamClientOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B94A3D15B907CF55C906C9A /* SteamClientOrchestrator.swift */; };
+		129146529D772EC1C559C0CB /* AppSteamClientDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B94A3D15B907CF55C906C9A /* AppSteamClientDriver.swift */; };
 		J1A2B3C4E5F61301A9B0C1D0 /* TroubleshootingWizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = J1A2B3C4E5F61301A9B0C1D1 /* TroubleshootingWizardView.swift */; };
 		J1A2B3C4E5F61301A9B0C1D2 /* ProgressRailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = J1A2B3C4E5F61301A9B0C1D3 /* ProgressRailView.swift */; };
 		J1A2B3C4E5F61301A9B0C1D4 /* SymptomPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = J1A2B3C4E5F61301A9B0C1D5 /* SymptomPickerView.swift */; };
@@ -324,12 +325,13 @@
 		F1A2B3C4E5F60801A9B0C1D0 /* ControllerMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControllerMonitor.swift; sourceTree = "<group>"; };
 		G1A2B3C4E5F60901A9B0C1D1 /* DependencyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyManager.swift; sourceTree = "<group>"; };
 		AB5DECAF20260818000000D5 /* RemediationExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemediationExecutor.swift; sourceTree = "<group>"; };
+		AB5DECAF20260818000000D1 /* QuickLaunch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLaunch.swift; sourceTree = "<group>"; };
 		G1A2B3C4E5F60901A9B0C1D3 /* Winetricks+Install.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Winetricks+Install.swift"; sourceTree = "<group>"; };
 		H1A2B3C4E5F61001A9B0C1D1 /* LaunchTimeBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Whisky/Views/Common/LaunchTimeBanner.swift; sourceTree = SOURCE_ROOT; };
 		H1A2B3C4E5F61101A9B0C1D1 /* DependencyConfigSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyConfigSection.swift; sourceTree = "<group>"; };
 		H1A2B3C4E5F61101A9B0C1D3 /* DependencyInstallSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyInstallSheet.swift; sourceTree = "<group>"; };
 		I1A2B3C4E5F61201A9B0C1D1 /* SteamDownloadMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SteamDownloadMonitor.swift; sourceTree = "<group>"; };
-		2B94A3D15B907CF55C906C9A /* SteamClientOrchestrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SteamClientOrchestrator.swift; sourceTree = "<group>"; };
+		2B94A3D15B907CF55C906C9A /* AppSteamClientDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSteamClientDriver.swift; sourceTree = "<group>"; };
 		J1A2B3C4E5F61301A9B0C1D1 /* TroubleshootingWizardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TroubleshootingWizardView.swift; sourceTree = "<group>"; };
 		J1A2B3C4E5F61301A9B0C1D3 /* ProgressRailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressRailView.swift; sourceTree = "<group>"; };
 		J1A2B3C4E5F61301A9B0C1D5 /* SymptomPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymptomPickerView.swift; sourceTree = "<group>"; };
@@ -597,9 +599,10 @@
 				AA88CFEB38031323229CD377 /* LauncherDiagnostics.swift */,
 				G1A2B3C4E5F60901A9B0C1D1 /* DependencyManager.swift */,
 				AB5DECAF20260818000000D5 /* RemediationExecutor.swift */,
+				AB5DECAF20260818000000D1 /* QuickLaunch.swift */,
 				F1A2B3C4E5F60801A9B0C1D0 /* ControllerMonitor.swift */,
 				I1A2B3C4E5F61201A9B0C1D1 /* SteamDownloadMonitor.swift */,
-				2B94A3D15B907CF55C906C9A /* SteamClientOrchestrator.swift */,
+				2B94A3D15B907CF55C906C9A /* AppSteamClientDriver.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1066,11 +1069,12 @@
 				F1A2B3C4E5F60801A9B0C1D1 /* ControllerMonitor.swift in Sources */,
 				G1A2B3C4E5F60901A9B0C1D0 /* DependencyManager.swift in Sources */,
 				AB5DECAF20260818000000D4 /* RemediationExecutor.swift in Sources */,
+				AB5DECAF20260818000000D0 /* QuickLaunch.swift in Sources */,
 				G1A2B3C4E5F60901A9B0C1D2 /* Winetricks+Install.swift in Sources */,
 				H1A2B3C4E5F61101A9B0C1D0 /* DependencyConfigSection.swift in Sources */,
 				H1A2B3C4E5F61101A9B0C1D2 /* DependencyInstallSheet.swift in Sources */,
 				I1A2B3C4E5F61201A9B0C1D0 /* SteamDownloadMonitor.swift in Sources */,
-				129146529D772EC1C559C0CB /* SteamClientOrchestrator.swift in Sources */,
+				129146529D772EC1C559C0CB /* AppSteamClientDriver.swift in Sources */,
 				J1A2B3C4E5F61301A9B0C1D0 /* TroubleshootingWizardView.swift in Sources */,
 				J1A2B3C4E5F61301A9B0C1D2 /* ProgressRailView.swift in Sources */,
 				J1A2B3C4E5F61301A9B0C1D4 /* SymptomPickerView.swift in Sources */,
@@ -1251,7 +1255,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 54;
+				CURRENT_PROJECT_VERSION = 55;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Whisky/Preview Content\"";
 				DEVELOPMENT_TEAM = Z7JS58F8U3;
@@ -1269,7 +1273,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 3.6.1;
+				MARKETING_VERSION = 3.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.franke.Whisky;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1289,7 +1293,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 54;
+				CURRENT_PROJECT_VERSION = 55;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Whisky/Preview Content\"";
 				DEVELOPMENT_TEAM = Z7JS58F8U3;
@@ -1307,7 +1311,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 3.6.1;
+				MARKETING_VERSION = 3.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.franke.Whisky;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1375,7 +1379,7 @@
 				CODE_SIGN_ENTITLEMENTS = WhiskyThumbnail/WhiskyThumbnail.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 54;
+				CURRENT_PROJECT_VERSION = 55;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = Z7JS58F8U3;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1391,7 +1395,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 3.6.1;
+				MARKETING_VERSION = 3.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.franke.Whisky.WhiskyThumbnail;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1410,7 +1414,7 @@
 				CODE_SIGN_ENTITLEMENTS = WhiskyThumbnail/WhiskyThumbnail.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 54;
+				CURRENT_PROJECT_VERSION = 55;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = Z7JS58F8U3;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1426,7 +1430,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 3.6.1;
+				MARKETING_VERSION = 3.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.franke.Whisky.WhiskyThumbnail;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

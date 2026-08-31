@@ -152,6 +152,7 @@ public class Wine {
         fileHandle.writeApplicationInfo()
         fileHandle.writeInfo(for: bottle)
 
+        WineUserProfile.reconcile(bottleURL: bottle.url)
         let wineEnvironment = constructWineEnvironment(for: bottle, environment: environment)
 
         return try runProcess(
@@ -292,6 +293,10 @@ public class Wine {
             pinned.graphicsBackend = effectiveBackend
             programOverrides = pinned
         }
+
+        // The profile has to resolve under whichever name this runtime uses
+        // before anything in the bottle starts, or the app boots into an empty one.
+        WineUserProfile.reconcile(bottleURL: bottle.url)
 
         // Wine 11 exposes Unity 6's pointer APIs as stubs. If the game's own
         // Player.log proves it hit that path, install the scoped proxy and add
@@ -453,6 +458,7 @@ public class Wine {
         // Escape args and environment values to prevent shell injection from user-editable settings
         let escapedArgs = preEscaped ? args : args.esc
         var wineCmd = "\(wineBinary.esc) start /unix \(url.esc) \(escapedArgs)"
+        WineUserProfile.reconcile(bottleURL: bottle.url)
         let wineEnv = constructWineEnvironment(for: bottle, environment: environment)
         for envVar in wineEnv {
             if isValidEnvKey(envVar.key) {
@@ -570,6 +576,7 @@ public class Wine {
         let fileHandle = try makeFileHandle()
         fileHandle.writeApplicationInfo()
         fileHandle.writeInfo(for: bottle)
+        WineUserProfile.reconcile(bottleURL: bottle.url)
         let wineEnvironment = constructWineEnvironment(for: bottle, environment: environment)
 
         for await output in try runWineProcess(args: args, environment: wineEnvironment, fileHandle: fileHandle) {
@@ -670,6 +677,33 @@ public class Wine {
             } catch {
                 Logger.wineKit.error("Failed to kill bottle '\(bottle.settings.name)': \(error.localizedDescription)")
             }
+        }
+    }
+
+    /// Kills a bottle's wineserver and blocks until the kill command returns.
+    ///
+    /// For `applicationWillTerminate`: a `Task` queued there never runs
+    /// because the process exits as soon as the delegate returns, so the
+    /// asynchronous ``killBottle(bottle:)`` left every Wine process alive
+    /// on quit whatever the kill-on-quit setting said.
+    @MainActor
+    public static func killBottleAndWait(bottle: Bottle, timeout: TimeInterval = 5) {
+        let process = Process()
+        process.executableURL = wineserverBinary
+        process.arguments = ["-k"]
+        process.currentDirectoryURL = wineserverBinary.deletingLastPathComponent()
+        process.environment = constructWineEnvironment(for: bottle, environment: [:])
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        do {
+            try process.run()
+        } catch {
+            Logger.wineKit.error("Failed to kill bottle '\(bottle.settings.name)': \(error.localizedDescription)")
+            return
+        }
+        let deadline = Date().addingTimeInterval(timeout)
+        while process.isRunning, Date() < deadline {
+            Thread.sleep(forTimeInterval: 0.05)
         }
     }
 
